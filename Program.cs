@@ -72,13 +72,39 @@ public class Laberinto
 
     public static void RecorrerMaze()
     {
+
+        int anchodelaconsola = Console.WindowWidth;
+        int largodelaconsola = largodellaberinto;
+        int posiciondellaberinto = (anchodelaconsola - largodelaconsola) / 2;
+
         for (int i = 0; i < anchodellaberinto; i++)
         {
+            Console.Write(new string(' ', posiciondellaberinto));
             for (int j = 0; j < largodellaberinto; j++)
             {
                 Console.Write(Maze[i, j]);
+
+               
+
             }
             Console.WriteLine();
+        }
+    }
+
+    public static void Esmeraldas(int cantidad, int esmeralda)
+    {
+        int positionesmeraldaX;
+        int positionesmeraldaY;
+        for(int i = 0; i < cantidad; i++)
+        {
+            do {
+            positionesmeraldaX = random.Next(1, anchodellaberinto - 2);
+            positionesmeraldaY = random.Next(1, largodellaberinto - 2);
+            }
+
+
+            while (Maze[positionesmeraldaX, positionesmeraldaY] == 1);
+            Maze[positionesmeraldaX, positionesmeraldaY] = esmeralda;
         }
     }
     public static void Main(string[] args)
@@ -86,7 +112,9 @@ public class Laberinto
 
         Generaciondellaberinto();
         Iniciodellaberinto();
+        Esmeraldas(15, 5);
         RecorrerMaze();
+        
     }
 
 }
