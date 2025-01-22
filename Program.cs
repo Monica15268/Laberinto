@@ -4,8 +4,8 @@ using System.Runtime.CompilerServices;
 
 public class Laberinto
 {
-    public static int anchodellaberinto = 31;
-    public static int largodellaberinto = 27;
+    public static int anchodellaberinto = 21;
+    public static int largodellaberinto = 21;
     public static int[,] Maze = new int[anchodellaberinto, largodellaberinto];
     static Random random = new Random();
 
@@ -81,25 +81,61 @@ public class Laberinto
         {
             Console.Write(new string(' ', posiciondellaberinto));
             for (int j = 0; j < largodellaberinto; j++)
-            {
-                Console.Write(Maze[i, j]);
+            {    if(Maze[i, j] == 1)
+                {
+                    Console.BackgroundColor= ConsoleColor.DarkMagenta;
+                    Console.ForegroundColor= ConsoleColor.DarkMagenta;
+                }
+            if(Maze[i, j] == 0)
+                {
+                    Console.BackgroundColor = ConsoleColor.Black;
+                    Console.ForegroundColor = ConsoleColor.Black;
+                }
+            if(Maze[i, j] == 5)
+                {
+                    Console.BackgroundColor = ConsoleColor.DarkBlue;
+                    Console.ForegroundColor = ConsoleColor.DarkBlue;
+                }
+                if (Maze[i, j] == 7)
+                {
+                    Console.BackgroundColor = ConsoleColor.DarkGray;
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                }
+                Console.Write(Maze[i, j] + " " );
 
                
-
+                Console.ResetColor();
             }
             Console.WriteLine();
         }
     }
+    public static void Piedras(int piedra)
+    {
+        int cantidadobstaculos = 9;
+        int posdelobstaculoX;
+        int posdelobstaculoY;
+        for(int i = 0;i < cantidadobstaculos; i++)
+        {
+            do
+            {
+                posdelobstaculoX = random.Next(3, anchodellaberinto - 3);
+                posdelobstaculoY = random.Next(3, largodellaberinto - 3);
+            }
+            while (Maze[posdelobstaculoX, posdelobstaculoY] == 0 || Maze[posdelobstaculoX, posdelobstaculoY] == 5);
 
-    public static void Esmeraldas(int cantidad, int esmeralda)
+
+            Maze[posdelobstaculoX, posdelobstaculoY] = piedra;
+        }
+    }
+    public static void Esmeraldas(int cantidadesmeraldas, int esmeralda)
     {
         int positionesmeraldaX;
         int positionesmeraldaY;
-        for(int i = 0; i < cantidad; i++)
+        for(int i = 0; i < cantidadesmeraldas; i++)
         {
             do {
-            positionesmeraldaX = random.Next(1, anchodellaberinto - 2);
-            positionesmeraldaY = random.Next(1, largodellaberinto - 2);
+            positionesmeraldaX = random.Next(3, anchodellaberinto - 2);
+            positionesmeraldaY = random.Next(3, largodellaberinto - 2);
             }
 
 
@@ -113,6 +149,7 @@ public class Laberinto
         Generaciondellaberinto();
         Iniciodellaberinto();
         Esmeraldas(15, 5);
+        Piedras(7);
         RecorrerMaze();
         
     }
