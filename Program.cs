@@ -1,15 +1,63 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Reflection.PortableExecutable;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Spectre.Console;
+//public class Characters
+//{
+
+//    public string Nombre { get; set; }
+//    public int Vida { get; set; }
+//    public int Velocidad { get; set; }
+//    public int Saltatrampas { get; set; }
+//    public int Enfriamiento { get; set; }
+//    public int posicionX { get; set; }
+//    public int posicionY { get; set; }
+
+//    public int Representacion { get; set; }
+
+//    public Characters(string nombre, int vida, int velocidad, int posicionx, int posiciony, int representacion)
+//    {
+
+//        Nombre = nombre;
+//        Vida = vida;
+//        //Enfriamiento = enfriamiento;
+//        //Saltatrampas = saltartrampas;
+//        posicionX = posicionx;
+//        posicionY = posiciony;
+//        Velocidad = velocidad;
+//        Representacion = representacion;
+//    }
+//    public void Move(int nuevaposicionX, int nuevaposicionY)
+//    {
+
+
+//        while (true)
+//        {
+
+//            int nuevaposicionX = seleccion1.posicionX;
+//            int nuevaposicionY = seleccion1.posicionY;
+
+//    public void Life(int vida)
+//    {
+//        vida = this.Vida;
+//    }
+
+//}
 public class Laberinto
 {
-    public static int anchodellaberinto = 21;
-    public static int largodellaberinto = 21;
+    public static int anchodellaberinto = 23;
+    public static int largodellaberinto = 23;
     public static int[,] Maze = new int[anchodellaberinto, largodellaberinto];
-    static Random random = new Random();
+   public static Random random = new Random();
+   public static string[] nombres = { "Charly", "Johayron", "Miley Cyrus", "Andy Black", "Bon Jovi" };
+   public static char[] Simbologia = { 'C', 'J', 'M', 'A', 'B' };
+   public static int[] PosX = { 1, 1, 1, 1, 1 };
+    public static int[] PosY = { 1, 1, 1, 1, 1 };
+
 
     public static void Generaciondellaberinto()
     {
@@ -18,7 +66,7 @@ public class Laberinto
             for (int j = 0; j < Maze.GetLength(1); j++)
             
                 Maze[i, j] = 1; //Se llenea el laberinto de paredes
-            
+        
 
         
     }
@@ -60,8 +108,7 @@ public class Laberinto
         }
     }
 
-
-
+    
     public static void Iniciodellaberinto()
     {
 
@@ -72,19 +119,29 @@ public class Laberinto
         Maze[anchodellaberinto - 1, largodellaberinto - 2] = 0;
     }
 
-    public static void RecorrerMaze()
+    public static void RecorrerMaze(char[] Simbologia, string[] nombres,int[] Posx, int[] PosY )
     {
-        
+       
+        Console.Clear();
         
         int anchodelaconsola = Console.WindowWidth;
         int largodelaconsola = largodellaberinto;
-        int posiciondellaberinto = (anchodelaconsola - largodelaconsola) / 2; //centrar el laberinto en el medio
-        StringBuilder Introducirlaberintodentrodelpanel = new StringBuilder();
+        int posiciondellaberinto = (anchodelaconsola - largodelaconsola*2) / 2; //centrar el laberinto en el medio
+       
         for (int i = 0; i < anchodellaberinto; i++)
         {
             Console.Write(new string(' ', posiciondellaberinto));
             for (int j = 0; j < largodellaberinto; j++)
-            {    if(Maze[i, j] == 1) //diseñar laberinto
+            {
+               
+              
+                if (Maze[i, j] == 9)
+                {
+                   Console.BackgroundColor = Color.Green;
+                    Console.ForegroundColor = Color.Green;
+                }
+            
+               if(Maze[i, j] == 1) //diseñar laberinto
                 {
                     Console.BackgroundColor= ConsoleColor.DarkMagenta;
                     Console.ForegroundColor= ConsoleColor.DarkMagenta;
@@ -108,14 +165,22 @@ public class Laberinto
                     Console.BackgroundColor = ConsoleColor.DarkRed;
                     Console.ForegroundColor = ConsoleColor.DarkRed;
                 }
-                Console.Write(Maze[i, j] + " ");
+                if(Maze[i, j] == 'M')
+                {
+                    Console.BackgroundColor = ConsoleColor.Yellow;
+                }
+
+             
+                    Console.Write(Maze[i, j] + " ");
                 
-               
+
+
                 Console.ResetColor();
             }
             Console.WriteLine();
             
         }
+        
         //var panel = new Panel("Land");
         //{ 
         //panel.Width = largodellaberinto * 2;
@@ -127,6 +192,47 @@ public class Laberinto
 
         //AnsiConsole.Write(panel);
     }
+
+
+        //public static void Selecciones(int character)
+        //{
+        //     posx = 1;
+        //     posy = 1;
+        
+        //    Maze[posx, posy] = character;
+        //}
+    public static void Movimientos(int g, int[] Posx, int[] Posy)
+    {
+        int posicionnuevax = Posx[g]; //para el mov x
+        int posicionnuevay = Posy[g]; // para el mov y
+        
+        ConsoleKeyInfo tecla = Console.ReadKey(true);
+        switch (tecla.Key)
+        {
+            case ConsoleKey.W:
+                posicionnuevay--;
+                break;
+            case ConsoleKey.S:
+                posicionnuevay++;
+                break;
+            case ConsoleKey.D:
+               posicionnuevax++;
+                break;
+            case ConsoleKey.A:
+                posicionnuevax--;
+                break;
+            
+
+        }
+        if (posicionnuevax> 0 && posicionnuevay > 0 && posicionnuevax < anchodellaberinto && posicionnuevay < anchodellaberinto)
+        {
+            Posx[g] = posicionnuevax;
+            Posy[g] = posicionnuevay;
+        }
+
+    }
+
+    
     public static void Piedras(int piedra) //obstaculos
     {
         int cantidadobstaculos = 9;
@@ -161,119 +267,71 @@ public class Laberinto
             Maze[positionesmeraldaX, positionesmeraldaY] = esmeralda;
         }
     }
-    public static void Seleccion(){
-        List<Characters> personajes = new List<Characters>();
-        {
-            new Characters("Goro", 60, 1 );
-            new Characters("Paco", 70,  3 );
-            new Characters("Juan", 100, 7 );
-        }
+
+        public static void Selecciondepersonajes()
+    {
+
+        string[] nombres = { "Charly", "Johayron", "Miley Cyrus", "Andy Black", "Bon Jovi" };
+        char[] Simbologia = { 'C', 'J', 'M', 'A', 'B' };
         Console.WriteLine("Elige un personaje");
-        for(int i = 0;i < personajes.Count; i++)
+        for (int i = 0; i < nombres.GetLength(0); i++)
         {
-            Console.Write($"{i + 1}.{personajes[i].Nombre}"  + personajes[i].Vida);
+
+            Console.WriteLine(" {0} - Nombre : {1}  Simbologia : {2}  ", i + 1, nombres[i], Simbologia[i]);
+
         }
-        int seleccionadoone;
-        int seleccionadotwo;
-        while (true)
+        Console.WriteLine("Escoge los personajes");
+        int seleccionadoone = Convert.ToInt32(Console.ReadLine());
+        int seleccionadotwo = Convert.ToInt32(Console.ReadLine());
+        while (seleccionadoone < 0 || seleccionadotwo < 0 || seleccionadoone > nombres.Length || seleccionadotwo > nombres.Length)
         {
+            Console.WriteLine("Introduce de nuevo el personaje");
             seleccionadoone = Convert.ToInt32(Console.ReadLine());
             seleccionadotwo = Convert.ToInt32(Console.ReadLine());
-
-            if(seleccionadoone > 0 && seleccionadoone < personajes.Count && seleccionadotwo> 0 && seleccionadotwo < personajes.Count) {
-                break;
-            }
-            Console.WriteLine("Introduce otro numero");
         }
-            
-        Characters seleccion1 = personajes[seleccionadoone - 1];
-        Characters seleccion2 = personajes[seleccionadotwo - 1];
-}
-    public static void Selecciondel1eerpersonaje(int seleccion1)
-    {
+        //Debo arreglarle los limites a esta parte
+    }
+   
         
-        int posicionseleccion1;
-        int posicionseleccion2;
-        do
-        {
-            posicionseleccion1 = random.Next(1, 3);
-            posicionseleccion2 = random.Next(1, 3);
 
-            Maze[posicionseleccion1, posicionseleccion2] = seleccion1;
-        }
-        while (Maze[posicionseleccion1, posicionseleccion2] != 0);
-
-
-    }
-
-    public static void Selecciondel1eerpersonaje2(int seleccion2)
-    {
-       
-        int posicionseleccion1;
-        int posicionseleccion2;
-        do
-        {
-            posicionseleccion1 = random.Next(1, 3);
-            posicionseleccion2 = random.Next(1, 3);
-
-            Maze[posicionseleccion1, posicionseleccion2] = seleccion2;
-        }
-        while (Maze[posicionseleccion1, posicionseleccion2] != 0);
-
-
-    }
-
-    public static void Main(string[] args) //basicamente como funciona el proyecto
+    
+public static void Main(string[] args) //basicamente como funciona el proyecto
     {
        
         Generaciondellaberinto();
-        Iniciodellaberinto();
+
+        Selecciondepersonajes();
+        //int Characterone = seleccionadoone;
+        //char Characterone = 'M';
+      //Characterone = nombres[seleccionadoone - 1];
+            //    Characters seleccion1 = personajes[seleccionadoone - 1];
+            //    Characters seleccion2 = personajes[seleccionadotwo - 1];
+
+
+            Iniciodellaberinto();
         Esmeraldas(15, 5);
-        Selecciondel1eerpersonaje(3);
-        Selecciondel1eerpersonaje2(9);
+       
         Piedras(7);
-        RecorrerMaze();
-        
-    }
 
-}
-
-
-public class Characters
-{
-
-    public string Nombre { get; set; }
-    public int Vida { get; set; }
-    public int Velocidad {  get; set; }
-    public int Saltatrampas { get; set; }
-    public int Enfriamiento { get; set; }
-    //public int PosicionGorox { get; set; }
-    //public int PosicionGoroy { get; set; }
-
-    public Characters(string nombre, int vida,   int velocidad)
-    {
+        RecorrerMaze(Simbologia, nombres, PosX, PosY);
+       
+      
     
-        Nombre = nombre;
-        Vida = vida;
-        //Enfriamiento = enfriamiento;
-        //Saltatrampas = saltartrampas;
-        //PosicionGorox = posiciongorox;
-        //PosicionGoroy = posiciongoroy;
-        Velocidad = velocidad;
-    }
+  
    
+
 }
+    }
 
 
 
-public class Charatcer
-{
-    public string Nombre { get; set; }
-    public int Vida { get; set; }
-    public int Rapidez { get; set; }
-    public int Enfriamiento { get; set; }
-    public int PosicionMariano { get; set; }
-    public int PosicionMarianoy { get; set; }
-}
+
+
+
+
+
+
+
+
 
 
