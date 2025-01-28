@@ -280,7 +280,30 @@ public static void Main(string[] args) //basicamente como funciona el proyecto
 
             }
 }
-public class Personajes
+
+      
+
+    }
+    public class Habilidad
+    {
+        public string Nombre { get; set; }
+        public int Daño { get; set; }
+
+        public Habilidad(string nombre, int daño)
+        {
+            Nombre = nombre;
+            Daño = daño;
+        }
+
+        public void Uso()   //invocar uso y que diga el nombre y el daño
+        {
+
+
+            Console.WriteLine("Se uso habilidad {0} causando daño de {1}", Nombre, Daño);
+        }
+
+    }
+    public class Personajes
 {
     //Clase personaje
     public string Nombre {  get; set; }
@@ -288,6 +311,7 @@ public class Personajes
      public int PosicionX { get; set; }
         public int PosicionY { get; set; }
       public int Vida { get; set; }
+            public List <Habilidad> Habilidades { get; set; }
       
         public Personajes(string nombre, char simbolo, int posicionx, int posiciony, int vida)
         {
@@ -296,14 +320,25 @@ public class Personajes
             PosicionX = posicionx;
             PosicionY = posiciony;
              Vida = vida;
+                Habilidades = new List<Habilidad>(); //para agregar personaje
+        }
+            public void Agregarhabilidad(Habilidad habilidad) //Agregar habilidad a cada personaje
+            {
+                Habilidades.Add(habilidad);
+            }
+        public void UsarHabilidad(int index) //Esto es para invocarla,dependiendo del personaje
+        {
+            if (index >= 0 && index < Habilidades.Count)
+            {
+                Habilidades[index].Uso();
+            }
+           
         }
 
-}
+    }
 
-
-
-}
-}
+     
+    }
 
 
 
