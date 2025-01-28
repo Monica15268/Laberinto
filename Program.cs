@@ -91,7 +91,7 @@ public class Laberinto
         public void SeleccionarPersonaje()
         {
             //Lista de personajes
-            List<Personajes> elecciones = new List<Personajes>  { new Personajes (  "Calamardo",  'C', 1,  1,100 ), new Personajes ("Bob Esponja",  'B',  1,  2,  50 ), new Personajes (  "Patricio", 'P',  1,  1,  75 ), new Personajes ("Don Cangrejo",  'D',  1,  1,  90 ), new Personajes (  "Camgreburger",  'C', 1,  1,  30 ), new Personajes (  "Juanita",  'J',  1,  1,  70 ) };
+            List<Personajes> elecciones = new List<Personajes>  { new Personajes (  "Calamardo",  'C', 1,  1,100, 3 ), new Personajes ("Bob Esponja",  'B',  1,  2,  50, 1 ), new Personajes (  "Patricio", 'P',  1,  1,  75, 2 ), new Personajes ("Don Cangrejo",  'D',  1,  1,  90, 1 ), new Personajes (  "Camgreburger",  'C', 1,  1,  30, 2 ), new Personajes (  "Juanita",  'J',  1,  1,  70, 2 ) };
             Console.WriteLine("Elijan sus personaje");
             for (int i = 0; i < elecciones.Count; i++)
             {
@@ -163,50 +163,91 @@ public class Laberinto
 
 
 
-
-
-        //Modificar esta parte despues
-
         public void Mover(ConsoleKeyInfo tecla)
-    {
-            int nuevaposicionuser1X = user1.PosicionX; //Asignar posiciones, y como son 2 jugadores, entonces cada uno tendra una posicion unica
+        {
+            // Posiciones actuales de los jugadores
+            int nuevaposicionuser1X = user1.PosicionX;
             int nuevaposicionuser1Y = user1.PosicionY;
             int nuevaposicionuser2X = user2.PosicionX;
             int nuevaposicionuser2Y = user2.PosicionY;
 
-            if(Sistemadeturnos == 0) {
-                switch (tecla.Key)
+           //Rango del movimiento, debo arreglarlo
+            int rangoUser1 = user1.Velocidad; // Rango basado en la velocidad
+            int rangoUser2 = user2.Velocidad; // Rango basado en la velocidad
+
+            if (Sistemadeturnos == 0)
+            {
+                // Intento de mov jugador 1
+                int pasosMovidos = MoverJugador(ref nuevaposicionuser1X, ref nuevaposicionuser1Y, tecla, rangoUser1);
+                if (pasosMovidos > 0)
                 {
-                    case ConsoleKey.W: nuevaposicionuser1X--; break; // Arriba
-                    case ConsoleKey.S: nuevaposicionuser1X++; break; // Abajo
-                    case ConsoleKey.A:  nuevaposicionuser1Y--; break; // Izquierda
-                    case ConsoleKey.D: nuevaposicionuser1Y++; break; // Derecha
-                    default: return;
+                    user1.PosicionX = nuevaposicionuser1X;
+                    user1.PosicionY = nuevaposicionuser1Y;
                 }
             }
-            if(Sistemadeturnos == 1)
+            else if (Sistemadeturnos == 1)
             {
-                switch(tecla.Key)
+                // Mov jugador 2
+                int pasosMovidos = MoverJugador(ref nuevaposicionuser2X, ref nuevaposicionuser2Y, tecla, rangoUser2);
+                if (pasosMovidos > 0)
                 {
-                    case ConsoleKey.UpArrow: nuevaposicionuser2X--; break;
-                    case ConsoleKey.DownArrow: nuevaposicionuser2X++; break;
-                    case ConsoleKey.LeftArrow: nuevaposicionuser2Y--; break;
-                    case ConsoleKey.RightArrow: nuevaposicionuser2Y++; break;
-                    default: return;
+                    user2.PosicionX = nuevaposicionuser2X;
+                    user2.PosicionY = nuevaposicionuser2Y;
                 }
             }
-            if (nuevaposicionuser1X > 0 && nuevaposicionuser1X < anchodellaberinto && nuevaposicionuser1Y > 0 && nuevaposicionuser1Y < largodellaberinto && Maze[nuevaposicionuser1X, nuevaposicionuser1Y] == 0 && nuevaposicionuser2X > 0 && nuevaposicionuser2X < anchodellaberinto && nuevaposicionuser2Y > 0 && nuevaposicionuser2Y < largodellaberinto && Maze[nuevaposicionuser2X, nuevaposicionuser2Y] == 0)
-            {
-                user1.PosicionX = nuevaposicionuser1X;
-               user1.PosicionY = nuevaposicionuser1Y;
-                user2.PosicionX = nuevaposicionuser2X;
-                user2.PosicionY = nuevaposicionuser2Y;
 
-            }
-
-           Sistemadeturnos = (Sistemadeturnos + 1) % 2;
+            // Cambio de turno
+            Sistemadeturnos = (Sistemadeturnos + 1) % 2;
         }
-    
+
+        private int MoverJugador(ref int posX, ref int posY, ConsoleKeyInfo tecla, int rango)
+        {
+            int pasos = 0;
+
+            // direcc del mov segun tecla
+            int deltaX = 0, deltaY = 0;
+
+            switch (tecla.Key)
+            {
+                //Arreglar esto
+                case ConsoleKey.W: deltaX = -1; break; // Arriba
+                case ConsoleKey.S: deltaX = 1; break;  // Abajo
+                case ConsoleKey.A: deltaY = -1; break; // Izquierda
+                case ConsoleKey.D: deltaY = 1; break;  // Derecha
+                case ConsoleKey.UpArrow: deltaX = -1; break; // Arriba (jugador 2)
+                case ConsoleKey.DownArrow: deltaX = 1; break; // Abajo (jugador 2)
+                case ConsoleKey.LeftArrow: deltaY = -1; break; // Izquierda (jugador 2)
+                case ConsoleKey.RightArrow: deltaY = 1; break; // Derecha (jugador 2)
+                default: return pasos; // No se mueve si no es una tecla válida
+            }
+
+            // mover hasta el rango, si se puede
+            for (int i = 0; i < rango; i++)
+            {
+                if (EsPosicionValida(posX + deltaX, posY + deltaY))
+                {
+                    //Se le asigna la misma variable de movimiento, debo arreglar eso
+                    posX += deltaX;
+                    posY += deltaY;
+                    pasos++;
+                }
+                else
+                {
+                    break; // Detenerse al encontrar una pared
+                }
+            }
+
+            return pasos; //retornar pasos
+        }
+        private bool EsPosicionValida(int x, int y)
+        {
+            return x >= 0 && x < anchodellaberinto && y >= 0 && y < largodellaberinto && Maze[x, y] == 0;
+        }
+
+        //Modificar esta parte despues
+
+
+
         public void RecorrerMaze()
         {
             Console.Clear();
@@ -311,15 +352,17 @@ public static void Main(string[] args) //basicamente como funciona el proyecto
      public int PosicionX { get; set; }
         public int PosicionY { get; set; }
       public int Vida { get; set; }
+        public int Velocidad { get; set; }
             public List <Habilidad> Habilidades { get; set; }
       
-        public Personajes(string nombre, char simbolo, int posicionx, int posiciony, int vida)
+        public Personajes(string nombre, char simbolo, int posicionx, int posiciony, int vida, int velocidad)
         {
             Nombre = nombre;
             Simbolo = simbolo;
             PosicionX = posicionx;
             PosicionY = posiciony;
              Vida = vida;
+            Velocidad = velocidad;
                 Habilidades = new List<Habilidad>(); //para agregar personaje
         }
             public void Agregarhabilidad(Habilidad habilidad) //Agregar habilidad a cada personaje
@@ -334,10 +377,51 @@ public static void Main(string[] args) //basicamente como funciona el proyecto
             }
            
         }
+        public void Mover(int casillas)
+        {
+            if (casillas <= Velocidad)
+            {
+                Console.WriteLine($"{Nombre} se mueve {casillas} casillas.");
+            }
+            else
+            {
+                Console.WriteLine($"{Nombre} no puede moverse más de {Velocidad} casillas.");
+            }
+        }
 
     }
 
      
+    public class Trampas
+    {
+        public string Nombre {  get; set; }
+        public bool Activacion {  get; set; }
+        public int PosicionX { get; set; }
+        public int PosicionY { get; set; }
+        private Random randomtrampa;
+        int Daño { get; set; }
+        public Trampas(string nombre, int daño)
+        {
+          Nombre = nombre;
+            Activacion = true;
+            randomtrampa = new Random();
+            Daño = daño;
+            
+            Posiciondelatrampa();
+
+        }
+
+        public void Posiciondelatrampa()
+        {
+            PosicionX= randomtrampa.Next(2, 21);
+            PosicionY = randomtrampa.Next(2,21);
+
+        }
+        public void Desactivacion()
+        {
+            Activacion= false;
+        }
+    }
     }
 
 
