@@ -1,170 +1,136 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Reflection.PortableExecutable;
-using System.Runtime.CompilerServices;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using Spectre.Console;
+﻿
 
+
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using Spectre.Console;
+namespace Creaciondeljuego {
 public class Laberinto
 {
-    public static int anchodellaberinto = 23;
-    public static int largodellaberinto = 23;
-    public static int[,] Maze = new int[anchodellaberinto, largodellaberinto];
-   public static Random random = new Random();
-  
+     private static int anchodellaberinto = 23;
+    private  static int largodellaberinto = 23;
+        private static int[,] Maze = new int[anchodellaberinto, largodellaberinto];
+        private static Random random = new Random();
+       private  Personajes user1;
+        private  Personajes user2;
+        private int Sistemadeturnos = 0; //turnos
 
 
-    public static void Generaciondellaberinto()
-    {
-        for (int i = 0; i < Maze.GetLength(0); i++)
-        
-            for (int j = 0; j < Maze.GetLength(1); j++)
-            
-                Maze[i, j] = 1; //Se llenea el laberinto de paredes
-        
+        public Laberinto(int ancho, int largo)
+        {
+            anchodellaberinto = ancho;
+            largodellaberinto = largo;
+            Maze = new int[anchodellaberinto, largodellaberinto];
 
-        
-    }
+            // Inicializar el laberinto con paredes (1)
+            for (int i = 0; i < anchodellaberinto; i++)
+                for (int j = 0; j < largodellaberinto; j++)
+                    Maze[i, j] = 1;
+
+            Iniciodellaberinto();
+        }
+
+        public static void Iniciodellaberinto()
+        {
+            int casillainicial = random.Next(1, anchodellaberinto - 1) / 2 * 2 + 1;
+            int casillafinal = random.Next(1, largodellaberinto - 2) / 2 * 2 + 1;
+            Expansiondecaminos(casillainicial, casillafinal);
+            Maze[1, 1] = 0; // Punto de inicio
+            Maze[anchodellaberinto - 2, largodellaberinto - 2] = 0; // Punto final
+        }
 
 
 
-    public static void Expansiondecaminos(int ancho, int largo)
+
+
+
+
+        private static void Expansiondecaminos(int ancho, int largo)
     {
         int[] anchox = { 0, 2, -2, 0 }; //direcciones
         int[] largoY = { -2, 0, 0, 2 };
 
 
-        for (int i = anchox.Length - 1; i > 0; i--)
-        {
-            int j = random.Next(i + 1);  //intercambiar filas y columnas
-            var tempAncho = anchox[i];
-            anchox[i] = anchox[j];
-            anchox[j] = tempAncho;
-
-            var tempLargo = largoY[i];
-            largoY[i] = largoY[j];
-            largoY[j] = tempLargo;
-        }
-
-
-
-        for (int i = 0; i < anchox.Length; i++) //una sola porque ambas tienen la misma extension
-        {
-            int nuevomovimientoX = ancho + anchox[i];
-            int nuevomovimientoY = largo + largoY[i];
-
-            if (nuevomovimientoX > 0 && nuevomovimientoY > 0 && nuevomovimientoX < anchodellaberinto && nuevomovimientoY < largodellaberinto && Maze[nuevomovimientoX, nuevomovimientoY] == 1)
+            for (int i = anchox.Length - 1; i > 0; i--)
             {
-                Maze[ancho + anchox[i] / 2, largo + largoY[i] / 2] = 0; //abrir camino
-                Maze[nuevomovimientoX, nuevomovimientoY] = 0;
+                int j = random.Next(i + 1);
+                Mezcla(ref anchox[i], ref anchox[j]);
+                Mezcla(ref largoY[i], ref largoY[j]);
+            }
 
-                Expansiondecaminos(nuevomovimientoX, nuevomovimientoY);
+            for (int i = 0; i < anchox.Length; i++)
+            {
+                int nuevomovimientoX = ancho + anchox[i];
+                int nuevomovimientoY = largo + largoY[i];
+
+                if (nuevomovimientoX > 0 && nuevomovimientoY > 0 &&
+                    nuevomovimientoX < anchodellaberinto && nuevomovimientoY < largodellaberinto &&
+                    Maze[nuevomovimientoX, nuevomovimientoY] == 1)
+                {
+                    Maze[ancho + anchox[i] / 2, largo + largoY[i] / 2] = 0; // Abrir camino
+                    Maze[nuevomovimientoX, nuevomovimientoY] = 0;
+
+                    Expansiondecaminos(nuevomovimientoX, nuevomovimientoY);
+                }
             }
         }
-    }
-
-    
-    public static void Iniciodellaberinto()
-    {
-
-        int casillainicial = random.Next(1, anchodellaberinto - 1) / 2 * 2 + 1;
-        int casillafinal = random.Next(1, largodellaberinto - 2) / 2 * 2 + 1; 
-        Expansiondecaminos(casillainicial, casillafinal);//empezar desde aca
-        Maze[1, 1] = 0;
-        Maze[anchodellaberinto - 1, largodellaberinto - 2] = 0;
-    }
-
-    public static void RecorrerMaze ( int [,] Maze ,List<Personajes> elecciones )
-    {
-       
-        Console.Clear();
-        
-        int anchodelaconsola = Console.WindowWidth;
-        int largodelaconsola = largodellaberinto;
-        int posiciondellaberinto = (anchodelaconsola - largodelaconsola*2) / 2; //centrar el laberinto en el medio
-       
-        for (int i = 0; i < anchodellaberinto; i++)
+        private static void Mezcla(ref int a, ref int b) //Mezclar direcciones
         {
-            Console.Write(new string(' ', posiciondellaberinto));
-            for (int j = 0; j < largodellaberinto; j++)
+            int temp = a;
+            a = b;
+            b = temp;
+        }
+
+
+
+
+
+
+
+        public void SeleccionarPersonaje()
+        {
+            //Lista de personajes
+            List<Personajes> elecciones = new List<Personajes>  { new Personajes (  "Calamardo",  'C', 1,  1,100 ), new Personajes ("Bob Esponja",  'B',  1,  2,  50 ), new Personajes (  "Patricio", 'P',  1,  1,  75 ), new Personajes ("Don Cangrejo",  'D',  1,  1,  90 ), new Personajes (  "Camgreburger",  'C', 1,  1,  30 ), new Personajes (  "Juanita",  'J',  1,  1,  70 ) };
+            Console.WriteLine("Elijan sus personaje");
+            for (int i = 0; i < elecciones.Count; i++)
             {
-             
-              
-                
-
-                if (Maze[i, j] == 9)
-                {
-                   Console.BackgroundColor = Color.Green;
-                    Console.ForegroundColor = Color.Green;
-                }
-            
-               if(Maze[i, j] == 1) //diseñar laberinto
-                {
-                    Console.BackgroundColor= ConsoleColor.DarkMagenta;
-                    Console.ForegroundColor= ConsoleColor.DarkMagenta;
-                }
-            if(Maze[i, j] == 0)
-                {
-                    Console.BackgroundColor = ConsoleColor.Black;
-                    Console.ForegroundColor = ConsoleColor.Black;
-                }
-            if(Maze[i, j] == 5)
-                {
-                    Console.BackgroundColor = ConsoleColor.DarkBlue;
-                    Console.ForegroundColor = ConsoleColor.DarkBlue;
-                }
-                if (Maze[i, j] == 7)
-                {
-                    Console.BackgroundColor = ConsoleColor.DarkGray;
-                    Console.ForegroundColor = ConsoleColor.DarkGray;
-                }
-                if (Maze[i, j] == 4){
-                    Console.BackgroundColor = ConsoleColor.DarkRed;
-                    Console.ForegroundColor = ConsoleColor.DarkRed;
-                }
-                if(Maze[i, j] == 'M')
-                {
-                    Console.BackgroundColor = ConsoleColor.Yellow;
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                }
-                bool ocupado = false;
-                foreach(Personajes avatars in elecciones)
-                {
-                    if (avatars.posicionX == i &&  avatars.posicionY == j) {
-                        Console.Write(avatars.Nombre.Substring(0, 1));
-                        ocupado = true; break; }
-                    if (!ocupado)
-                    {
-                        Console.Write(Maze[i, j] + " ");
-                    }
-             
-                  
-                
-
-
-                Console.ResetColor();
+                Console.WriteLine(" {0} - Nombre : {1} " + " Vida: {2}", i + 1, elecciones[i].Nombre, elecciones[i].Vida); //Mostrar Menu con personajes 
             }
-            Console.WriteLine();
-            
+            List<Personajes> seleccionados = new() { };
+            while (seleccionados.Count < 2)
+            {
+                int seleccionuser1 = Convert.ToInt32(Console.ReadLine()); //Comprobar si el 1er personaje es valido 
+                while (seleccionuser1 < 0 || seleccionuser1 > elecciones.Count)
+                {
+                    Console.WriteLine("Debes introducir uno de los valores de la lista");
+                    seleccionuser1 = Convert.ToInt32(Console.ReadLine());
+                }
+                //Basicamente la eleccion,todavia falta hacer que el usuario siempre introduzca un numero valido
+                var selecciondelusuario = elecciones[seleccionuser1 - 1]; //Se escoge el numero y se le resta  1 para acceder al elemento correspondiente
+                if (!seleccionados.Contains(selecciondelusuario))
+                {
+                    seleccionados.Add(selecciondelusuario);
+                }
+
+            }
+
+            user1 = seleccionados[0];
+            user2 = seleccionados [1];
+            user1.PosicionX = 1;
+            user1.PosicionY = 1;
+            user2.PosicionX = 1;
+            user2.PosicionY = 1;
+
+            Sistemadeturnos = 0;
         }
-
-        }
-
-
-
-    }
-
-   
-
 
     public static void Piedras(int piedra) //obstaculos
     {
         int cantidadobstaculos = 9;
         int posdelobstaculoX;
         int posdelobstaculoY;
-        for(int i = 0;i < cantidadobstaculos; i++) //ciclo para que me ponga la cantidad de piedras que le indique
+        for (int i = 0; i < cantidadobstaculos; i++) //ciclo para que me ponga la cantidad de piedras que le indique
         {
             do
             {
@@ -181,11 +147,12 @@ public class Laberinto
     {
         int positionesmeraldaX;
         int positionesmeraldaY;
-        for(int i = 0; i < cantidadesmeraldas; i++)
+        for (int i = 0; i < cantidadesmeraldas; i++)
         {
-            do {
-            positionesmeraldaX = random.Next(3, anchodellaberinto - 2);
-            positionesmeraldaY = random.Next(3, largodellaberinto - 2);
+            do
+            {
+                positionesmeraldaX = random.Next(3, anchodellaberinto - 2);
+                positionesmeraldaY = random.Next(3, largodellaberinto - 2);
             }
 
 
@@ -194,135 +161,149 @@ public class Laberinto
         }
     }
 
-        public static void Selecciondepersonajes()
+
+
+
+
+        //Modificar esta parte despues
+
+        public void Mover(ConsoleKeyInfo tecla)
     {
+            int nuevaposicionuser1X = user1.PosicionX; //Asignar posiciones, y como son 2 jugadores, entonces cada uno tendra una posicion unica
+            int nuevaposicionuser1Y = user1.PosicionY;
+            int nuevaposicionuser2X = user2.PosicionX;
+            int nuevaposicionuser2Y = user2.PosicionY;
 
-        List<Personajes> elecciones = new List<Personajes>();
-        elecciones.Add(new Personajes { Nombre = "Calamardo", posicionX = 1, posicionY = 1, vida = 100, arriba = ConsoleKey.UpArrow, abajo = ConsoleKey.DownArrow, izquierda = ConsoleKey.LeftArrow, derecha = ConsoleKey.RightArrow });
-        elecciones.Add(new Personajes { Nombre = "Bob Esponja", posicionX = 1, posicionY = 2, vida = 50, arriba = ConsoleKey.UpArrow, abajo = ConsoleKey.DownArrow, izquierda = ConsoleKey.LeftArrow, derecha = ConsoleKey.RightArrow });
-        elecciones.Add(new Personajes { Nombre = "Patricio", posicionX = 1, posicionY = 1, vida = 75, arriba = ConsoleKey.UpArrow, abajo = ConsoleKey.DownArrow, izquierda = ConsoleKey.LeftArrow, derecha = ConsoleKey.RightArrow });
-        elecciones.Add(new Personajes { Nombre = "Don Cangrejo", posicionX = 1, posicionY = 2, vida = 90, arriba = ConsoleKey.UpArrow, abajo = ConsoleKey.DownArrow, izquierda = ConsoleKey.LeftArrow, derecha = ConsoleKey.RightArrow });
-        elecciones.Add(new Personajes { Nombre = "Camgreburger", posicionX = 1, posicionY = 1, vida = 30, arriba = ConsoleKey.UpArrow, abajo = ConsoleKey.DownArrow, izquierda = ConsoleKey.LeftArrow, derecha = ConsoleKey.RightArrow });
-        elecciones.Add(new Personajes{         Nombre = "Juanita",posicionX = 1,posicionY = 2, vida = 70, arriba = ConsoleKey.UpArrow, abajo = ConsoleKey.DownArrow, izquierda = ConsoleKey.LeftArrow, derecha = ConsoleKey.RightArrow });
-        Console.WriteLine("Elige un personaje");
-        for (int i = 0; i < elecciones.Count; i++)
-        {
-
-            Console.WriteLine(" {0} - Nombre : {1}  vida : {2}  ", i + 1, elecciones[0],elecciones[3]);
-
-        }
-        Console.WriteLine("Escoge los personajes");
-        int seleccionadoone = Convert.ToInt32(Console.ReadLine());
-        int seleccionadotwo = Convert.ToInt32(Console.ReadLine());
-        while (seleccionadoone < 0 || seleccionadotwo < 0 || seleccionadoone > elecciones.Count || seleccionadotwo > elecciones.Count)
-        {
-            Console.WriteLine("Introduce de nuevo el personaje");
-            seleccionadoone = Convert.ToInt32(Console.ReadLine());
-            seleccionadotwo = Convert.ToInt32(Console.ReadLine());
-        }
-        //Debo arreglarle los limites a esta parte
-    }
-   
-        
-
-    
-public static void Main(string[] args) //basicamente como funciona el proyecto
-    {
-        Generaciondellaberinto();
-
-        Iniciodellaberinto();
-        Esmeraldas(15, 5);
-
-        Piedras(7);
-        Selecciondepersonajes();
-        Console.Clear();
-        while (true) { 
-        List <Personajes> elecciones = new List<Personajes>();
-        elecciones.Add(new Personajes { Nombre = "Calamardo" , posicionX = 1, posicionY = 1, vida = 100, arriba = ConsoleKey.UpArrow, abajo = ConsoleKey.DownArrow, izquierda = ConsoleKey.LeftArrow, derecha = ConsoleKey.RightArrow });
-        elecciones.Add(new Personajes { Nombre = "Bob Esponja", posicionX = 1, posicionY = 2, vida = 50, arriba = ConsoleKey.UpArrow, abajo = ConsoleKey.DownArrow, izquierda = ConsoleKey.LeftArrow, derecha = ConsoleKey.RightArrow });
-        elecciones.Add(new Personajes { Nombre = "Patricio", posicionX = 1, posicionY = 1, vida = 75, arriba = ConsoleKey.UpArrow, abajo = ConsoleKey.DownArrow, izquierda = ConsoleKey.LeftArrow, derecha = ConsoleKey.RightArrow });
-        elecciones.Add(new Personajes { Nombre = "Don Cangrejo", posicionX = 1, posicionY = 2, vida = 90, arriba = ConsoleKey.UpArrow, abajo = ConsoleKey.DownArrow, izquierda = ConsoleKey.LeftArrow, derecha = ConsoleKey.RightArrow });
-        elecciones.Add(new Personajes { Nombre = "Camgreburger", posicionX = 1, posicionY = 1, vida = 30, arriba = ConsoleKey.UpArrow, abajo = ConsoleKey.DownArrow, izquierda = ConsoleKey.LeftArrow, derecha = ConsoleKey.RightArrow });
-        elecciones.Add(new Personajes { Nombre = "Juanita", posicionX = 1, posicionY = 2, vida = 70, arriba = ConsoleKey.UpArrow, abajo = ConsoleKey.DownArrow, izquierda = ConsoleKey.LeftArrow, derecha = ConsoleKey.RightArrow });
-     
-      
-
-     
-    
-   
-        
-        RecorrerMaze(Maze, elecciones);
-            ConsoleKeyInfo tecla = Console.ReadKey();
-
-            foreach(Personajes personajes in elecciones) {
-                if (tecla.Key == personajes.arriba)
+            if(Sistemadeturnos == 0) {
+                switch (tecla.Key)
                 {
-                    personajes.Arriba(23);
-                }
-                if(tecla.Key == personajes.abajo)
-                {
-                    personajes.Abajo(23);
-                }
-                if(tecla.Key == personajes.izquierda)
-                {
-                    personajes.Izquierda(23);
-
-                }
-                if (tecla.Key == personajes.derecha)
-                {
-                    personajes.Derecha(23);
+                    case ConsoleKey.W: nuevaposicionuser1X--; break; // Arriba
+                    case ConsoleKey.S: nuevaposicionuser1X++; break; // Abajo
+                    case ConsoleKey.A:  nuevaposicionuser1Y--; break; // Izquierda
+                    case ConsoleKey.D: nuevaposicionuser1Y++; break; // Derecha
+                    default: return;
                 }
             }
+            if(Sistemadeturnos == 1)
+            {
+                switch(tecla.Key)
+                {
+                    case ConsoleKey.UpArrow: nuevaposicionuser2X--; break;
+                    case ConsoleKey.DownArrow: nuevaposicionuser2X++; break;
+                    case ConsoleKey.LeftArrow: nuevaposicionuser2Y--; break;
+                    case ConsoleKey.RightArrow: nuevaposicionuser2Y++; break;
+                    default: return;
+                }
+            }
+            if (nuevaposicionuser1X > 0 && nuevaposicionuser1X < anchodellaberinto && nuevaposicionuser1Y > 0 && nuevaposicionuser1Y < largodellaberinto && Maze[nuevaposicionuser1X, nuevaposicionuser1Y] == 0 && nuevaposicionuser2X > 0 && nuevaposicionuser2X < anchodellaberinto && nuevaposicionuser2Y > 0 && nuevaposicionuser2Y < largodellaberinto && Maze[nuevaposicionuser2X, nuevaposicionuser2Y] == 0)
+            {
+                user1.PosicionX = nuevaposicionuser1X;
+               user1.PosicionY = nuevaposicionuser1Y;
+                user2.PosicionX = nuevaposicionuser2X;
+                user2.PosicionY = nuevaposicionuser2Y;
 
+            }
+
+           Sistemadeturnos = (Sistemadeturnos + 1) % 2;
         }
+    
+        public void RecorrerMaze()
+        {
+            Console.Clear();
+
+            int posiciondellaberinto = (Console.WindowWidth - largodellaberinto * 2) / 2; // Centrar el laberinto
+
+            for (int i = 0; i < anchodellaberinto; i++)
+            {
+                Console.Write(new string(' ', posiciondellaberinto));
+                for (int j = 0; j < largodellaberinto; j++)
+                {
+                    if (Maze[i, j] == 1)
+                    {  
+                        Console.Write("#"); // Pared
+                        
+                    }
+                    else if (i == user1.PosicionX && j == user1.PosicionY)
+                    {
+                        Console.Write(user1.Simbolo); // Mostrar Jugador 1
+                    }
+                    else if (i == user2.PosicionX && j == user2.PosicionY)
+                    {
+                        Console.Write(user2.Simbolo); // Mostrar Jugador 2
+                    }
+                    else
+                    {
+                        Console.Write(" "); // Espacio abierto
+                    }
+                }
+                Console.WriteLine(); // Nueva línea al final de cada fila
+            }
+
+            Console.WriteLine($"Turno de: {(Sistemadeturnos == 0 ? "Jugador 1" : "Jugador 2")}"); //Indicacion del turno
+
+                }
+
+            
 
 
 
 
-    }
+public static void Main(string[] args) //basicamente como funciona el proyecto
+   
+     {
+            Laberinto laberinto = new Laberinto(21, 21);
+
+            laberinto.SeleccionarPersonaje();
+
+            while (true)
+            {
+                laberinto.RecorrerMaze();
+                ConsoleKeyInfo tecla = Console.ReadKey(true);
+
+                if (tecla.Key == ConsoleKey.Escape) break; // Salir del juego
+                laberinto.Mover(tecla);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            }
 }
 public class Personajes
 {
-    public string Nombre;
-    public int posicionX;
-    public int posicionY;
-    public int vida;
-    public ConsoleKey arriba, abajo, derecha, izquierda;
-
-    public void Arriba(int altodelalberinto)
-    {
-        if(posicionY > 0)
+    //Clase personaje
+    public string Nombre {  get; set; }
+     public char Simbolo { get; set; }
+     public int PosicionX { get; set; }
+        public int PosicionY { get; set; }
+      public int Vida { get; set; }
+      
+        public Personajes(string nombre, char simbolo, int posicionx, int posiciony, int vida)
         {
-            posicionY--;
+            Nombre = nombre;
+            Simbolo = simbolo;
+            PosicionX = posicionx;
+            PosicionY = posiciony;
+             Vida = vida;
         }
-    }
-    public void Abajo( int altodellaberinto)
-    {
-        if(posicionY < 0)
-        {
-            posicionY++;    
-        }
-    }
-    public void Izquierda (int anchodellaberinto)
-    {
-        if(posicionX > 0)
-        {
-            posicionX--;
-        }
-    }
-    public void Derecha(int anchodellaberinto)
-    {
-        if(posicionX < 0)
-        {
-            posicionX--;
-        }
-    }
 
 }
 
 
 
-
+}
+}
 
 
 
