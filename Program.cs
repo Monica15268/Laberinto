@@ -1,19 +1,121 @@
-﻿
-
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using Spectre.Console;
-namespace Creaciondeljuego {
-public class Laberinto
+using System.Runtime.Intrinsics.X86;
+using System.Timers;
+using Creaciondeljuego;
+
+
+namespace Creaciondeljuego
 {
-     private static int anchodellaberinto = 23;
-    private  static int largodellaberinto = 23;
+    public class Game
+    {
+        private new List<Personajes> PersonajesAelegir;
+        //private Laberinto laberinto;
+        private Personajes user1;
+        private Personajes user2;
+        private Laberinto laberinto;
+        //private int Sistemadeturnos = 0; //turnos
+
+        //private int[,] Maze;
+        private int eleccion;
+
+
+
+        public void Iniciar() //Bucle inicial del juego 
+        {
+            Console.WriteLine("Hola mi camarada");
+            Console.WriteLine("En Fondo de Vikini se desarrollara una competencia en un peligroso laberinto");
+            Console.WriteLine("¿Quieres ser parte de esta aventura?");
+            Console.WriteLine("1 - Si!, mi capitan, estamos listos");
+            Console.WriteLine("2 - No estoy listo, mi capitan, lo siento");
+            eleccion = Convert.ToInt32(Console.ReadLine()); //Elegir si entrar o no
+            while (eleccion < 1 || eleccion > 2)
+            {
+                eleccion = Convert.ToInt32(Console.ReadLine());
+                Console.WriteLine("Valor no valido, por favor, introduce una de las opciones validas");
+            } //Repetir esto, mientras no sea valido, se repite
+              //Debo lanzar una excepcion para cuando se introducen letras y cosas asi 
+            if (eleccion == 1)
+            {
+
+                Console.Clear();
+                CreacionDelMaze();
+            }
+            if (eleccion == 2)
+            {
+                Console.Clear();
+                Console.WriteLine("Hasta la proxima");
+                return;
+
+            }
+
+        }
+
+        public void CreacionDelMaze()
+        {
+            laberinto = new Laberinto(21, 21);
+
+
+            laberinto.ElegirJugadores(); //Para elegir jugadores, el metodo esta dentro de la clase laberinto para que no me traiga incovenientes
+            laberinto.RecorrerElLaberinto();
+
+        }
+
+
+
+    }
+
+
+
+
+
+
+    public class Ciclodeljuego
+    {
+
+        public static void Main(string[] args)
+        {
+            Game game = new Game();
+            game.Iniciar();
+        }
+    }
+    public class Personajes
+    {
+        //Clase personaje
+        public string Nombre { get; set; }
+        public char Simbolo { get; set; }
+        public int PosicionX { get; set; }
+        public int PosicionY { get; set; }
+        public int Vida { get; set; }
+        public int Velocidad { get; set; }
+        //public List<Habilidad> Habilidades { get; set; }
+        public Personajes personajes { get; set; }
+
+        public Personajes(string nombre, char simbolo, int posicionx, int posiciony, int vida, int velocidad)
+        {
+            Nombre = nombre;
+            Simbolo = simbolo;
+            posicionx = 1;
+            posiciony = 1;
+            Vida = vida;
+            Velocidad = velocidad;
+            //    Habilidades = new List<Habilidad>(); //para agregar personaje
+            //}
+        }
+    }
+    public class Laberinto
+    {
+        private static int anchodellaberinto;
+        private static int largodellaberinto;
         private static int[,] Maze = new int[anchodellaberinto, largodellaberinto];
         private static Random random = new Random();
-       private  Personajes user1;
-        private  Personajes user2;
+        private Personajes user1;
+        private Personajes user2;
+        private Game game;
+        private new List<Personajes> PersonajesAelegir;
+
+
         private int Sistemadeturnos = 0; //turnos
 
 
@@ -29,6 +131,38 @@ public class Laberinto
                     Maze[i, j] = 1;
 
             Iniciodellaberinto();
+
+
+        }
+        public void CreacionDeLista()
+        {
+            PersonajesAelegir = new List<Personajes>
+            { new Personajes("Patricio", 'L', 1, 1, 45, 2), new Personajes("Gary", 'G', 1, 1, 50, 1), new Personajes("Bob Esponja", 'B', 1, 1, 60, 1),
+             new Personajes("Calamardo", 'C', 1, 1, 70, 1), new Personajes("Arenita", 'A', 1, 1, 90, 2), new Personajes("Don Cangrejo", 'D', 1, 1, 100,1 )};
+
+            for (int i = 0; i < PersonajesAelegir.Count; i++)
+            {
+                var character = PersonajesAelegir[i]; //Para que salga el menu
+                Console.WriteLine(": {0} - Nombre : {1} || Vida : {2} || Velocidad : {3}", i + 1, character.Nombre, character.Vida, character.Velocidad);
+            }
+        }
+        public void ElegirJugadores() //Eleccion de jugadores
+        {
+            Console.WriteLine("Seleccione el personaje para Jugador 1:");
+            CreacionDeLista();
+            int seleccion1 = Convert.ToInt32(Console.ReadLine()) - 1;
+            user1 = PersonajesAelegir[seleccion1];
+            user1.PosicionX = 1;
+            user1.PosicionY = 1;
+            Console.WriteLine("Seleccione el personaje para Jugador 2:");
+            CreacionDeLista(); //    Quiero que me salgan todas las opciones, menos la que eligio el jugador 
+            int seleccion2 = Convert.ToInt32(Console.ReadLine()) - 1;
+            user2 = PersonajesAelegir[seleccion2];
+            user2.PosicionX = 1;
+            user2.PosicionY = 1;
+            //Quitar elemento de la lista
+            Console.WriteLine($"Jugador 1 ha elegido a {user1.Nombre}.");
+            Console.WriteLine($"Jugador 2 ha elegido a {user2.Nombre}.");
         }
 
         public static void Iniciodellaberinto()
@@ -47,9 +181,9 @@ public class Laberinto
 
 
         private static void Expansiondecaminos(int ancho, int largo)
-    {
-        int[] anchox = { 0, 2, -2, 0 }; //direcciones
-        int[] largoY = { -2, 0, 0, 2 };
+        {
+            int[] anchox = { 0, 2, -2, 0 }; //direcciones
+            int[] largoY = { -2, 0, 0, 2 };
 
 
             for (int i = anchox.Length - 1; i > 0; i--)
@@ -82,174 +216,10 @@ public class Laberinto
             b = temp;
         }
 
-
-
-
-
-
-
-        public void SeleccionarPersonaje()
+        public void RecorrerElLaberinto()
         {
-            //Lista de personajes
-            List<Personajes> elecciones = new List<Personajes>  { new Personajes (  "Calamardo",  'C', 1,  1,100, 3 ), new Personajes ("Bob Esponja",  'B',  1,  2,  50, 1 ), new Personajes (  "Patricio", 'P',  1,  1,  75, 2 ), new Personajes ("Don Cangrejo",  'D',  1,  1,  90, 1 ), new Personajes (  "Camgreburger",  'C', 1,  1,  30, 2 ), new Personajes (  "Juanita",  'J',  1,  1,  70, 2 ) };
-            Console.WriteLine("Elijan sus personaje");
-            for (int i = 0; i < elecciones.Count; i++)
-            {
-                Console.WriteLine(" {0} - Nombre : {1} " + " Vida: {2}", i + 1, elecciones[i].Nombre, elecciones[i].Vida); //Mostrar Menu con personajes 
-            }
-            List<Personajes> seleccionados = new() { };
-            while (seleccionados.Count < 2)
-            {
-                int seleccionuser1 = Convert.ToInt32(Console.ReadLine()); //Comprobar si el 1er personaje es valido 
-                while (seleccionuser1 < 0 || seleccionuser1 > elecciones.Count)
-                {
-                    Console.WriteLine("Debes introducir uno de los valores de la lista");
-                    seleccionuser1 = Convert.ToInt32(Console.ReadLine());
-                }
-                //Basicamente la eleccion,todavia falta hacer que el usuario siempre introduzca un numero valido
-                var selecciondelusuario = elecciones[seleccionuser1 - 1]; //Se escoge el numero y se le resta  1 para acceder al elemento correspondiente
-                if (!seleccionados.Contains(selecciondelusuario))
-                {
-                    seleccionados.Add(selecciondelusuario);
-                }
-
-            }
-
-            user1 = seleccionados[0];
-            user2 = seleccionados [1];
-            user1.PosicionX = 1;
-            user1.PosicionY = 1;
-            user2.PosicionX = 1;
-            user2.PosicionY = 1;
-
-            Sistemadeturnos = 0;
-        }
-
-    public static void Piedras(int piedra) //obstaculos
-    {
-        int cantidadobstaculos = 9;
-        int posdelobstaculoX;
-        int posdelobstaculoY;
-        for (int i = 0; i < cantidadobstaculos; i++) //ciclo para que me ponga la cantidad de piedras que le indique
-        {
-            do
-            {
-                posdelobstaculoX = random.Next(3, anchodellaberinto - 3);
-                posdelobstaculoY = random.Next(3, largodellaberinto - 3);
-            }
-            while (Maze[posdelobstaculoX, posdelobstaculoY] == 0 || Maze[posdelobstaculoX, posdelobstaculoY] == 5);
 
 
-            Maze[posdelobstaculoX, posdelobstaculoY] = piedra;
-        }
-    }
-    public static void Esmeraldas(int cantidadesmeraldas, int esmeralda) //lo que debe recoger el jugador
-    {
-        int positionesmeraldaX;
-        int positionesmeraldaY;
-        for (int i = 0; i < cantidadesmeraldas; i++)
-        {
-            do
-            {
-                positionesmeraldaX = random.Next(3, anchodellaberinto - 2);
-                positionesmeraldaY = random.Next(3, largodellaberinto - 2);
-            }
-
-
-            while (Maze[positionesmeraldaX, positionesmeraldaY] == 1);
-            Maze[positionesmeraldaX, positionesmeraldaY] = esmeralda;
-        }
-    }
-
-
-
-        public void Mover(ConsoleKeyInfo tecla)
-        {
-            // Posiciones actuales de los jugadores
-            int nuevaposicionuser1X = user1.PosicionX;
-            int nuevaposicionuser1Y = user1.PosicionY;
-            int nuevaposicionuser2X = user2.PosicionX;
-            int nuevaposicionuser2Y = user2.PosicionY;
-
-           //Rango del movimiento, debo arreglarlo
-            int rangoUser1 = user1.Velocidad; // Rango basado en la velocidad
-            int rangoUser2 = user2.Velocidad; // Rango basado en la velocidad
-
-            if (Sistemadeturnos == 0)
-            {
-                // Intento de mov jugador 1
-                int pasosMovidos = MoverJugador(ref nuevaposicionuser1X, ref nuevaposicionuser1Y, tecla, rangoUser1);
-                if (pasosMovidos > 0)
-                {
-                    user1.PosicionX = nuevaposicionuser1X;
-                    user1.PosicionY = nuevaposicionuser1Y;
-                }
-            }
-            else if (Sistemadeturnos == 1)
-            {
-                // Mov jugador 2
-                int pasosMovidos = MoverJugador(ref nuevaposicionuser2X, ref nuevaposicionuser2Y, tecla, rangoUser2);
-                if (pasosMovidos > 0)
-                {
-                    user2.PosicionX = nuevaposicionuser2X;
-                    user2.PosicionY = nuevaposicionuser2Y;
-                }
-            }
-
-            // Cambio de turno
-            Sistemadeturnos = (Sistemadeturnos + 1) % 2;
-        }
-
-        private int MoverJugador(ref int posX, ref int posY, ConsoleKeyInfo tecla, int rango)
-        {
-            int pasos = 0;
-
-            // direcc del mov segun tecla
-            int deltaX = 0, deltaY = 0;
-
-            switch (tecla.Key)
-            {
-                //Arreglar esto
-                case ConsoleKey.W: deltaX = -1; break; // Arriba
-                case ConsoleKey.S: deltaX = 1; break;  // Abajo
-                case ConsoleKey.A: deltaY = -1; break; // Izquierda
-                case ConsoleKey.D: deltaY = 1; break;  // Derecha
-                case ConsoleKey.UpArrow: deltaX = -1; break; // Arriba (jugador 2)
-                case ConsoleKey.DownArrow: deltaX = 1; break; // Abajo (jugador 2)
-                case ConsoleKey.LeftArrow: deltaY = -1; break; // Izquierda (jugador 2)
-                case ConsoleKey.RightArrow: deltaY = 1; break; // Derecha (jugador 2)
-                default: return pasos; // No se mueve si no es una tecla válida
-            }
-
-            // mover hasta el rango, si se puede
-            for (int i = 0; i < rango; i++)
-            {
-                if (EsPosicionValida(posX + deltaX, posY + deltaY))
-                {
-                    //Se le asigna la misma variable de movimiento, debo arreglar eso
-                    posX += deltaX;
-                    posY += deltaY;
-                    pasos++;
-                }
-                else
-                {
-                    break; // Detenerse al encontrar una pared
-                }
-            }
-
-            return pasos; //retornar pasos
-        }
-        private bool EsPosicionValida(int x, int y)
-        {
-            return x >= 0 && x < anchodellaberinto && y >= 0 && y < largodellaberinto && Maze[x, y] == 0;
-        }
-
-        //Modificar esta parte despues
-
-
-
-        public void RecorrerMaze()
-        {
             Console.Clear();
 
             int posiciondellaberinto = (Console.WindowWidth - largodellaberinto * 2) / 2; // Centrar el laberinto
@@ -260,9 +230,9 @@ public class Laberinto
                 for (int j = 0; j < largodellaberinto; j++)
                 {
                     if (Maze[i, j] == 1)
-                    {  
+                    {
                         Console.Write("#"); // Pared
-                        
+
                     }
                     else if (i == user1.PosicionX && j == user1.PosicionY)
                     {
@@ -282,147 +252,14 @@ public class Laberinto
 
             Console.WriteLine($"Turno de: {(Sistemadeturnos == 0 ? "Jugador 1" : "Jugador 2")}"); //Indicacion del turno
 
-                }
-
-            
+        }
 
 
 
 
-public static void Main(string[] args) //basicamente como funciona el proyecto
-   
-     {
-            Laberinto laberinto = new Laberinto(21, 21);
+    }
 
-            laberinto.SeleccionarPersonaje();
-
-            while (true)
-            {
-                laberinto.RecorrerMaze();
-                ConsoleKeyInfo tecla = Console.ReadKey(true);
-
-                if (tecla.Key == ConsoleKey.Escape) break; // Salir del juego
-                laberinto.Mover(tecla);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            }
 }
-
-      
-
-    }
-    public class Habilidad
-    {
-        public string Nombre { get; set; }
-        public int Daño { get; set; }
-
-        public Habilidad(string nombre, int daño)
-        {
-            Nombre = nombre;
-            Daño = daño;
-        }
-
-        public void Uso()   //invocar uso y que diga el nombre y el daño
-        {
-
-
-            Console.WriteLine("Se uso habilidad {0} causando daño de {1}", Nombre, Daño);
-        }
-
-    }
-    public class Personajes
-{
-    //Clase personaje
-    public string Nombre {  get; set; }
-     public char Simbolo { get; set; }
-     public int PosicionX { get; set; }
-        public int PosicionY { get; set; }
-      public int Vida { get; set; }
-        public int Velocidad { get; set; }
-            public List <Habilidad> Habilidades { get; set; }
-      
-        public Personajes(string nombre, char simbolo, int posicionx, int posiciony, int vida, int velocidad)
-        {
-            Nombre = nombre;
-            Simbolo = simbolo;
-            PosicionX = posicionx;
-            PosicionY = posiciony;
-             Vida = vida;
-            Velocidad = velocidad;
-                Habilidades = new List<Habilidad>(); //para agregar personaje
-        }
-            public void Agregarhabilidad(Habilidad habilidad) //Agregar habilidad a cada personaje
-            {
-                Habilidades.Add(habilidad);
-            }
-        public void UsarHabilidad(int index) //Esto es para invocarla,dependiendo del personaje
-        {
-            if (index >= 0 && index < Habilidades.Count)
-            {
-                Habilidades[index].Uso();
-            }
-           
-        }
-        public void Mover(int casillas)
-        {
-            if (casillas <= Velocidad)
-            {
-                Console.WriteLine($"{Nombre} se mueve {casillas} casillas.");
-            }
-            else
-            {
-                Console.WriteLine($"{Nombre} no puede moverse más de {Velocidad} casillas.");
-            }
-        }
-
-    }
-
-     
-    public class Trampas
-    {
-        public string Nombre {  get; set; }
-        public bool Activacion {  get; set; }
-        public int PosicionX { get; set; }
-        public int PosicionY { get; set; }
-        private Random randomtrampa;
-        int Daño { get; set; }
-        public Trampas(string nombre, int daño)
-        {
-          Nombre = nombre;
-            Activacion = true;
-            randomtrampa = new Random();
-            Daño = daño;
-            
-            Posiciondelatrampa();
-
-        }
-
-        public void Posiciondelatrampa()
-        {
-            PosicionX= randomtrampa.Next(2, 21);
-            PosicionY = randomtrampa.Next(2,21);
-
-        }
-        public void Desactivacion()
-        {
-            Activacion= false;
-        }
-    }
-    }
 
 
 
