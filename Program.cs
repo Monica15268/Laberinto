@@ -231,20 +231,20 @@ namespace Creaciondeljuego
                 {
                     if (Maze[i, j] == 1)
                     {
-                        Console.Write("#"); // Pared
+                        Console.Write("#" + " "); // Pared
 
                     }
                     else if (i == user1.PosicionX && j == user1.PosicionY)
                     {
-                        Console.Write(user1.Simbolo); // Mostrar Jugador 1
+                        Console.Write(user1.Simbolo + " "); // Mostrar Jugador 1
                     }
                     else if (i == user2.PosicionX && j == user2.PosicionY)
                     {
-                        Console.Write(user2.Simbolo); // Mostrar Jugador 2
+                        Console.Write(user2.Simbolo + " "); // Mostrar Jugador 2
                     }
                     else
                     {
-                        Console.Write(" "); // Espacio abierto
+                        Console.Write(" " + " "); // Espacio abierto
                     }
                 }
                 Console.WriteLine(); // Nueva línea al final de cada fila
