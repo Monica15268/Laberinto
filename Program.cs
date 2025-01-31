@@ -9,6 +9,15 @@ using System.Timers;
 using Creaciondeljuego;
 using Spectre.Console;
 
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Runtime.InteropServices.Marshalling;
+using System.Runtime.Intrinsics.X86;
+using System.Timers;
+using Creaciondeljuego;
+using Spectre.Console;
+
 
 namespace Creaciondeljuego
 {
@@ -103,6 +112,7 @@ namespace Creaciondeljuego
 
         }
 
+
         public void CreacionDelMaze()
         {
             laberinto = new Laberinto(21, 21);
@@ -134,7 +144,7 @@ namespace Creaciondeljuego
         public int Velocidad { get; set; }
         //public List<Habilidad> Habilidades { get; set; }
         public Personajes personajes { get; set; }
-        public Habilidades habilidades { get; set; }
+        public Habilidades Habilidades { get; set; }
         public bool AtraviesaParedes { get; set; }
         public bool InmuneATrampas { get; set; }
 
@@ -146,12 +156,13 @@ namespace Creaciondeljuego
             posiciony = 1;
             Vida = vida;
             Velocidad = velocidad;
-            Habilidades Habilidades = habilidades;
+            Habilidades = habilidades;
             AtraviesaParedes = false;
             InmuneATrampas = false;
             //    Habilidades = new List<Habilidad>(); //para agregar personaje
             //}
         }
+
     }
     public class Laberinto
     {
@@ -163,7 +174,7 @@ namespace Creaciondeljuego
         private Personajes user2;
         private Game game;
         private new List<Personajes> PersonajesAelegir;
-
+        private Habilidades Habilidades;
 
         private int Sistemadeturnos = 0; //turnos
 
@@ -193,7 +204,7 @@ namespace Creaciondeljuego
             int casillafinal = random.Next(1, largodellaberinto - 2) / 2 * 2 + 1;
             Expansiondecaminos(casillainicial, casillafinal);
             Maze[1, 1] = 0; // Punto de inicio
-            Maze[anchodellaberinto - 2, largodellaberinto - 2] = 0; // Punto final
+            Maze[anchodellaberinto - 2, largodellaberinto - 1] = 0; // Punto final
         }
 
 
@@ -246,16 +257,17 @@ namespace Creaciondeljuego
             Habilidades atraviesaParedes = new Habilidades("Atravisa paredes", 0, 7);
             Habilidades ignoraTrampas = new Habilidades("Ignora Trampas", 0, 5);
             Habilidades master = new Habilidades("Master", 5, 8);
-            //Lista de habilidades 
+
 
             PersonajesAelegir = new List<Personajes>
-            { new Personajes("Patricio", 'L', 1, 1, 45, 2, superPro), new Personajes("Gary", 'G', 1, 1, 50, 1,ignoraTrampas ), new Personajes("Bob Esponja", 'B', 1, 1, 60, 1, sanador),
+            { new Personajes("Patricio", 'L', 1, 1, 45, 2, superPro), new Personajes("Gary", 'G', 1, 1, 50, 2,ignoraTrampas ), new Personajes("Bob Esponja", 'B', 1, 1, 60, 1, sanador),
              new Personajes("Calamardo", 'C', 1, 1, 70, 1, sanador), new Personajes("Arenita", 'A', 1, 1, 90, 2,atraviesaParedes), new Personajes("Don Cangrejo", 'D', 1, 1, 100,1, superVeloz )};
 
             for (int i = 0; i < PersonajesAelegir.Count; i++)
             {
                 var character = PersonajesAelegir[i]; //Para que salga el menu
-                Console.WriteLine(": {0} - Nombre : {1} || Vida : {2} || Velocidad : {3}", i + 1, character.Nombre, character.Vida, character.Velocidad);
+
+                Console.WriteLine(": {0} - Nombre : {1} || Vida : {2} || Velocidad : {3} || Habilidad :   {4} ", i + 1, character.Nombre, character.Vida, character.Velocidad, character.Habilidades.Nombre);
             }
         }
         public void ElegirJugadores() //Eleccion de jugadores
@@ -357,7 +369,7 @@ namespace Creaciondeljuego
             {
                 posicionxdelatrampa = random.Next(1, anchodellaberinto - 1);
                 posicionydelatrampa = random.Next(1, largodellaberinto - 1);
-            } while (Maze[posicionxdelatrampa, posicionydelatrampa] != 0 || (posicionxdelatrampa == user1.PosicionX && posicionydelatrampa == user1.PosicionY) || (posicionxdelatrampa == user2.PosicionX && posicionydelatrampa == user2.PosicionY)); // Asegurarse de que la casilla esté vacía
+            } while (Maze[posicionxdelatrampa, posicionydelatrampa] != 0); // Asegurarse de que la casilla esté vacía
 
             Maze[posicionxdelatrampa, posicionydelatrampa] = tipodeTrampa; // Colocar la trampa
         }
@@ -368,6 +380,7 @@ namespace Creaciondeljuego
             {
 
                 Console.WriteLine("Eres inmune a trampas");
+                return;
             }
             int celdaActual = Maze[personajes.PosicionX, personajes.PosicionY];
 
@@ -377,7 +390,7 @@ namespace Creaciondeljuego
                     personajes.Vida -= 10;
                     Console.WriteLine("El personajes {0} ha caido en una trampa.Pierde 10 de vida ", personajes.Nombre);
                     MostrarEstadoJugador(personajes);
-                    MoverTrampaAleatoria(personajes.PosicionX, personajes.PosicionY, 5);
+                    //MoverTrampaAleatoria(personajes.PosicionX, personajes.PosicionY, 5);
                     break;
 
                 case 7: // Trampa que quita vida nuevaposiciondelatrampaY reduce velocidad
@@ -387,7 +400,8 @@ namespace Creaciondeljuego
                     Console.WriteLine("El personajes {0} ha caido en una trampa.Pierde 10 de vida . Velocidad reducida a 1 temporalmente", personajes.Nombre);
                     MostrarEstadoJugador(personajes);
                     RestaurarVelocidad(personajes, velocidadOriginal);
-                    MoverTrampaAleatoria(personajes.PosicionX, personajes.PosicionY, 7);
+                    //MoverTrampaAleatoria(personajes.PosicionX, personajes.PosicionY, 7);
+                    RestaurarVelocidad(personajes, velocidadOriginal);
                     break;
 
                 case 9: // Trampa que reduce velocidad
@@ -396,16 +410,19 @@ namespace Creaciondeljuego
                     Console.WriteLine("El personajes {0} ha caido en una trampa. Velocidad reducida a 2 temporalmente", personajes.Nombre);
                     MostrarEstadoJugador(personajes);
                     RestaurarVelocidad(personajes, velocidadOriginal);
-                    MoverTrampaAleatoria(personajes.PosicionX, personajes.PosicionY, 9);
+                    //MoverTrampaAleatoria(personajes.PosicionX, personajes.PosicionY, 9);
+
                     break;
+
             }
+            MostrarEstadoJugador(personajes);
         }
 
-        private void MoverTrampaAleatoria(int nuevaposiciondelatrampaX, int nuevaposiciondelatrampaY, int tipoTrampa)
-        {
-            Maze[nuevaposiciondelatrampaX, nuevaposiciondelatrampaY] = 0; // Eliminar la trampa de la posición actual
-            ColocarTrampaAleatoria(tipoTrampa); // Colocar la trampa en una nueva posición aleatoria
-        }
+        //private void MoverTrampaAleatoria(int nuevaposiciondelatrampaX, int nuevaposiciondelatrampaY, int tipoTrampa)
+        //{
+        //    Maze[nuevaposiciondelatrampaX, nuevaposiciondelatrampaY] = 0; // Eliminar la trampa de la posición actual
+        //    //ColocarTrampaAleatoria(tipoTrampa); // Colocar la trampa en una nueva posición aleatoria
+        //}
 
         private async void RestaurarVelocidad(Personajes jugador, int velocidadOriginal)
         {
@@ -416,7 +433,9 @@ namespace Creaciondeljuego
 
         private void MostrarEstadoJugador(Personajes personajes)
         {
+
             Console.WriteLine("Nombre : {0} Vida : {1}  Velocidad {2}", personajes.Nombre, personajes.Vida, personajes.Velocidad);
+            Thread.Sleep(1000);
         }
 
 
@@ -457,6 +476,34 @@ namespace Creaciondeljuego
             // Permitir movimiento a casillas vacías (0) o con trampas (5, 7, 9)
             return x >= 0 && x < anchodellaberinto && y >= 0 && y < largodellaberinto &&
                    (Maze[x, y] == 0 || Maze[x, y] == 5 || Maze[x, y] == 7 || Maze[x, y] == 9);
+        }
+        private void ManejarVida(Personajes personajes)
+        {
+            // Asegurar que la vida no exceda 100
+            if (personajes.Vida > 100)
+            {
+                personajes.Vida = 100;
+                Console.WriteLine($"{personajes.Nombre} ha alcanzado el máximo de vida (100).");
+            }
+
+            // Verificar si la vida llegó a 0
+            if (personajes.Vida <= 0)
+            {
+                Console.WriteLine($"{personajes.Nombre} ha perdido toda su vida. Regresando al inicio...");
+                RegresarAlInicio(personajes);
+            }
+        }
+
+        private void RegresarAlInicio(Personajes personajes)
+        {
+            //Restaurar vida
+            personajes.Vida = 10;
+
+            // Mover  al punto de inicio
+            personajes.PosicionX = 1;
+            personajes.PosicionY = 1;
+
+            Console.WriteLine("El personaje {0} ha regresado al principio", personajes.Nombre);
         }
 
         private void MoverJugadorConVelocidad(Personajes jugador, int deltaX, int deltaY)
@@ -500,9 +547,17 @@ namespace Creaciondeljuego
             {
                 Console.Clear();
                 PintarLaberinto();
-
+                Personajes jugadorActual = Sistemadeturnos == 0 ? user1 : user2;
                 Console.WriteLine($"Turno de: {(Sistemadeturnos == 0 ? "Jugador 1" : "Jugador 2")}"); //Sistema de turnos
+                Console.WriteLine("¿Deseas activar tu habilidad?");
+                Console.WriteLine("Presiona X para confirmar o cualquier tecla para rechazar");
+                char respuesta = Console.ReadKey().KeyChar;
+                respuesta = char.ToUpper(respuesta);
 
+                if (respuesta == 'X' && jugadorActual.Habilidades != null) //Elegir si usar habilidad o no
+                {
+                    jugadorActual.Habilidades.Activacion(jugadorActual);
+                }
                 bool movimientoValido = false;
 
                 if (Sistemadeturnos == 0)
@@ -545,6 +600,19 @@ namespace Creaciondeljuego
                     Sistemadeturnos = (Sistemadeturnos + 1) % 2; // Alternar turnos
                 }
                 //Poner por aqui condicion de victoria
+                if (user1.PosicionX == anchodellaberinto - 1 && user1.PosicionY == largodellaberinto - 2)
+                {
+                    Console.Clear();
+                    Console.WriteLine("Ha ganado {0}", user1.Nombre);
+                    return;
+                }
+                else if (user2.PosicionX == anchodellaberinto - 1 && user2.PosicionY == largodellaberinto - 2)
+                {
+                    Console.Clear();
+                    Console.WriteLine("Ha ganado {0}", user2.Nombre);
+                    return;
+                }
+
             }
         }
         private void PintarLaberinto()
@@ -610,9 +678,10 @@ public class Habilidades
 
         if (TiempodeEnfriamiento > 0)
         {
-            Console.WriteLine("El personaje {0} no tiene disponible aun la habilidad {1} ", personajes.Nombre, personajes.habilidades);
+            Console.WriteLine("El personaje {0} no tiene disponible aun la habilidad {1} ", personajes.Nombre, personajes.Habilidades.Nombre);
+            return;
         }
-        Console.WriteLine("El personaje {0} usara la habilidad {1} ", personajes.Nombre, personajes.habilidades);
+        Console.WriteLine("El personaje {0} usara la habilidad {1} ", personajes.Nombre, personajes.Habilidades.Nombre);
         switch (Nombre)
         {
             case "Sanador":
@@ -635,7 +704,7 @@ public class Habilidades
 
             case "Ignora Trampas":
                 personajes.InmuneATrampas = true;
-                Task.Delay(5000).ContinueWith(_ => DesactivaciondeTrampas(personajes)); //Desactivar trampa por tiempo determinado
+                Task.Delay(5000).ContinueWith(_ => DesactivaciondeTrampas(personajes)); //Desactivar tiempo
                 break;
             case "Master":
                 personajes.AtraviesaParedes = true;
@@ -643,18 +712,19 @@ public class Habilidades
                 personajes.Vida += 5;
                 break;
         }
+        TiempodeEnfriamientoRestante = TiempodeEnfriamiento;
     }
-    private void DesactivaciondeTrampas(Personajes personajes) //Metodo para la desactivacion de trampas
+    private void DesactivaciondeTrampas(Personajes personajes)
     {
         personajes.InmuneATrampas = false;
         Console.WriteLine("El jugador {0} ya no es inmune a trampas", personajes.Nombre);
     }
-    private void DesactivarParedes(Personajes personajes)  //Desactivar las paredes
+    private void DesactivarParedes(Personajes personajes)
     {
         personajes.AtraviesaParedes = false;
         Console.WriteLine("El jugador {0} ya no puede atravesar paredes", personajes.Nombre);
     }
-    private void Tiempo()  //Controlar tiempo 
+    private void Tiempo()
     {
         if (TiempodeEnfriamientoRestante > 0)
         {
@@ -675,6 +745,7 @@ public class Ciclodeljuego
         game.Iniciar();
     }
 }
+
 
 
 
