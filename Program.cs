@@ -76,7 +76,7 @@ namespace Creaciondeljuego
 
                     Console.WriteLine("Valor no valido, por favor, introduce una de las opciones validas");
                     //Repetir esto, mientras no sea valido, se repite
-                    //Debo lanzar una excepcion para cuando se introducen letras posicionydelatrampa cosas asi 
+                    
                     if (eleccion == 1)
                     {
 
