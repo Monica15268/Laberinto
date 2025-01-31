@@ -9,14 +9,7 @@ using System.Timers;
 using Creaciondeljuego;
 using Spectre.Console;
 
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Runtime.InteropServices.Marshalling;
-using System.Runtime.Intrinsics.X86;
-using System.Timers;
-using Creaciondeljuego;
-using Spectre.Console;
+
 
 
 namespace Creaciondeljuego
@@ -251,23 +244,40 @@ namespace Creaciondeljuego
         public void CreacionDeLista()
         {
 
-            Habilidades sanador = new Habilidades("Sanador", 10, 5);
-            Habilidades superVeloz = new Habilidades("Super Veloz", 3, 4);
-            Habilidades superPro = new Habilidades("Super pro", 30, 6);
-            Habilidades atraviesaParedes = new Habilidades("Atravisa paredes", 0, 7);
-            Habilidades ignoraTrampas = new Habilidades("Ignora Trampas", 0, 5);
-            Habilidades master = new Habilidades("Master", 5, 8);
+            Habilidades sanador = new Habilidades("Sanador", 30, 2);
+            Habilidades superVeloz = new Habilidades("Super Veloz", 3, 2);
+            Habilidades superPro = new Habilidades("Super pro", 0, 2);
+            Habilidades atraviesaParedes = new Habilidades("Atravisa paredes", 0, 1);
+            Habilidades ignoraTrampas = new Habilidades("Ignora Trampas", 0, 2);
+            Habilidades master = new Habilidades("Master", 5, 2);
 
 
             PersonajesAelegir = new List<Personajes>
-            { new Personajes("Patricio", 'L', 1, 1, 45, 2, superPro), new Personajes("Gary", 'G', 1, 1, 50, 2,ignoraTrampas ), new Personajes("Bob Esponja", 'B', 1, 1, 60, 1, sanador),
+            { new Personajes("Patricio", 'L', 1, 1, 45, 2, superPro), new Personajes("Gary", 'G', 1, 1, 50, 2,ignoraTrampas ), new Personajes("Bob Esponja", 'B', 1, 1, 60, 1, master),
              new Personajes("Calamardo", 'C', 1, 1, 70, 1, sanador), new Personajes("Arenita", 'A', 1, 1, 90, 2,atraviesaParedes), new Personajes("Don Cangrejo", 'D', 1, 1, 100,1, superVeloz )};
+          
 
             for (int i = 0; i < PersonajesAelegir.Count; i++)
             {
                 var character = PersonajesAelegir[i]; //Para que salga el menu
+                var table = new Table()
+             .Border(TableBorder.Rounded) // Añae un borde redondeado
+             .AddColumn(new TableColumn("[bold]Nombre[/]").Centered()) //Centrar, poner en letra negrita
+             .AddColumn(new TableColumn("[bold]Vida[/]").Centered())
+             .AddColumn(new TableColumn("[bold]Velocidad[/]").Centered())
+             .AddColumn(new TableColumn("[bold]Habilidad[/]").Centered());
+                //Fila con los datos del personaje
+                table.AddRow(
+                    character.Nombre,
+                    character.Vida.ToString(),
+                    character.Velocidad.ToString(),
+                    character.Habilidades.Nombre
+                );
 
-                Console.WriteLine(": {0} - Nombre : {1} || Vida : {2} || Velocidad : {3} || Habilidad :   {4} ", i + 1, character.Nombre, character.Vida, character.Velocidad, character.Habilidades.Nombre);
+                //Muestra tabla
+                Console.WriteLine($"Opción {i + 1}: {character.Nombre}");
+                AnsiConsole.Write(table);
+               
             }
         }
         public void ElegirJugadores() //Eleccion de jugadores
@@ -308,7 +318,16 @@ namespace Creaciondeljuego
             Console.WriteLine("El personajes 1 ha escogido a   {0} ", user1.Nombre);
 
             Console.WriteLine("El personajes 2 ha escogido a   {0} ", user2.Nombre); //Para mostrar selecciones
-            Thread.Sleep(10000);
+            AnsiConsole.Progress()  //Barra de progreso
+        .Start(ctx =>
+        { var task = ctx.AddTask("Cargando laberito");
+            while (!task.IsFinished)
+            {
+                task.Increment(1);
+                Thread.Sleep(100);
+            }
+        });
+           
         }
 
 
@@ -540,7 +559,13 @@ namespace Creaciondeljuego
         {
             return tecla == ConsoleKey.UpArrow || tecla == ConsoleKey.DownArrow || tecla == ConsoleKey.LeftArrow || tecla == ConsoleKey.RightArrow;
         }
-
+        private void BajarTiempodeEnfriamiento(Personajes jugador) //Metodo para reducir el tiempo de enfriamiento
+        {
+            if (jugador.Habilidades != null && jugador.Habilidades.TiempodeEnfriamientoRestante > 0)
+            {
+                jugador.Habilidades.TiempodeEnfriamientoRestante--;
+            }
+        }
         public void Avancedeljuego()
         {
             while (true)
@@ -549,6 +574,8 @@ namespace Creaciondeljuego
                 PintarLaberinto();
                 Personajes jugadorActual = Sistemadeturnos == 0 ? user1 : user2;
                 Console.WriteLine($"Turno de: {(Sistemadeturnos == 0 ? "Jugador 1" : "Jugador 2")}"); //Sistema de turnos
+                BajarTiempodeEnfriamiento(user1);
+                BajarTiempodeEnfriamiento(user2 );
                 Console.WriteLine("¿Deseas activar tu habilidad?");
                 Console.WriteLine("Presiona X para confirmar o cualquier tecla para rechazar");
                 char respuesta = Console.ReadKey().KeyChar;
@@ -626,33 +653,57 @@ namespace Creaciondeljuego
                 {
                     if (Maze[i, j] == 1)
                     {
+                       
+                        Console.BackgroundColor = ConsoleColor.DarkMagenta;
+                        Console.ForegroundColor = ConsoleColor.DarkMagenta;
                         Console.Write("#" + " "); // Pared
                     }
                     else if (i == user1.PosicionX && j == user1.PosicionY)
                     {
+                       
+                        Console.BackgroundColor= ConsoleColor.DarkRed;
+                        Console.ForegroundColor = ConsoleColor.DarkRed;
                         Console.Write(user1.Simbolo + " "); // Mostrar User1 
+
                     }
                     else if (i == user2.PosicionX && j == user2.PosicionY)
                     {
+                     
+                        Console.BackgroundColor = ConsoleColor.DarkYellow;
+                        Console.ForegroundColor = ConsoleColor.DarkYellow;
                         Console.Write(user2.Simbolo + " "); // Mostrar user2
                     }
                     else if (Maze[i, j] == 5)
                     {
+                        
+                        Console.BackgroundColor = ConsoleColor.Gray;
+                        Console.ForegroundColor = ConsoleColor.Gray;
                         Console.Write("T" + " "); // Trampa que quita vida
                     }
                     else if (Maze[i, j] == 7)
                     {
+                      
+                        Console.BackgroundColor = ConsoleColor.Gray;
+                        Console.ForegroundColor = ConsoleColor.Gray;
                         Console.Write("V" + " "); // Trampa que quita vida posicionydelatrampa reduce velocidad
                     }
                     else if (Maze[i, j] == 9)
                     {
+                        
+                        Console.BackgroundColor = ConsoleColor.Gray;
+                        Console.ForegroundColor = ConsoleColor.Gray;
                         Console.Write("S" + " "); // Trampa que reduce velocidad
                     }
                     else
                     {
+                        
+                        Console.BackgroundColor = ConsoleColor.Black;
+                        Console.ForegroundColor = ConsoleColor.Black;
                         Console.Write(" " + " "); // Espacio abierto
                     }
+                    Console.ResetColor();
                 }
+                
                 Console.WriteLine(); // Nueva línea al final de cada fila
             }
         }
@@ -676,7 +727,7 @@ public class Habilidades
     public void Activacion(Personajes personajes)
     {
 
-        if (TiempodeEnfriamiento > 0)
+        if (TiempodeEnfriamientoRestante > 0)
         {
             Console.WriteLine("El personaje {0} no tiene disponible aun la habilidad {1} ", personajes.Nombre, personajes.Habilidades.Nombre);
             return;
@@ -685,30 +736,32 @@ public class Habilidades
         switch (Nombre)
         {
             case "Sanador":
-                personajes.Vida += 10;
+                personajes.Vida += 30;
                 break;
 
             case "Super Veloz":
                 personajes.Velocidad += 3;
+                Task.Delay(10000);
                 break;
 
             case "Super pro":
-                personajes.Vida += 30;
-                personajes.Velocidad += 2;
+                personajes.Vida += 1;
+                personajes.AtraviesaParedes = true;
+                Task.Delay(10000);
                 break;
 
             case "Atravisa paredes":
                 personajes.AtraviesaParedes = true;
-                Task.Delay(7000);
+                Task.Delay(10000);
                 break;
 
             case "Ignora Trampas":
                 personajes.InmuneATrampas = true;
-                Task.Delay(5000).ContinueWith(_ => DesactivaciondeTrampas(personajes)); //Desactivar tiempo
+                Task.Delay(10000).ContinueWith(_ => DesactivaciondeTrampas(personajes)); //Desactivar tiempo
                 break;
             case "Master":
                 personajes.AtraviesaParedes = true;
-                Task.Delay(3000);
+                Task.Delay(10000);
                 personajes.Vida += 5;
                 break;
         }
