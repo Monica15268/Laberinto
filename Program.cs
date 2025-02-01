@@ -807,10 +807,10 @@ public class Habilidades
         }
 
         EnCooldown = true; // Activa el cooldown
-        IniciarCooldown(); 
+        TiempodeEspera(); 
     }
 
-    private void IniciarCooldown()
+    private void TiempodeEspera()
     {
         Thread cooldownThread = new Thread(() =>
         {
