@@ -11,7 +11,7 @@
 #### Movimiento
 *Con respecto al tema movimiento, se podría decir que es bastante sencillo,  pues el primer jugador se moverá con las teclas W(arriba), S(abajo), A(izquierda), D(derecha). El segundo jugador se movera con las flechas.*
 ##### Habilidades
-**Sanador** *: Aumenta la vida del personaje en 30*
+**Sanador** *: Aumenta la vida del personaje en 30*  <br>
 **Master**	*:Aumenta la vida en 5 puntos y la velocidad en 1 punto.*
 **Ignora Trampas** *:Otorga inmunidad a trampas.*
 **Super pro**	*: Aumenta la vida en 10 puntos y otorga inmunidad a trampas.*
