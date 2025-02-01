@@ -106,7 +106,7 @@ namespace Creaciondeljuego
         }
 
 
-        public void CreacionDelMaze()
+        public void CreacionDelMaze()  //Se incluye el laberinto, el menu de elegir jugadores y el avance del juego, vendria siendo como gran parte de su cuerpo
         {
             laberinto = new Laberinto(21, 21);
 
@@ -135,10 +135,10 @@ namespace Creaciondeljuego
         public int PosicionY { get; set; }
         public int Vida { get; set; }
         public int Velocidad { get; set; }
-        //public List<Habilidad> Habilidades { get; set; }
+       
         public Personajes personajes { get; set; }
         public Habilidades Habilidades { get; set; }
-        public bool AtraviesaParedes { get; set; }
+       
         public bool InmuneATrampas { get; set; }
 
         public Personajes(string nombre, char simbolo, int posicionx, int posiciony, int vida, int velocidad, Habilidades habilidades)
@@ -150,17 +150,16 @@ namespace Creaciondeljuego
             Vida = vida;
             Velocidad = velocidad;
             Habilidades = habilidades;
-            AtraviesaParedes = false;
+            
             InmuneATrampas = false;
-            //    Habilidades = new List<Habilidad>(); //para agregar personaje
-            //}
+           
         }
 
     }
     public class Laberinto
     {
-        private static int anchodellaberinto;
-        private static int largodellaberinto;
+        private static int anchodellaberinto = 21; //Inicializar para que no haya errores
+        private static int largodellaberinto = 21; //Inicializar para que no haya errores
         private static int[,] Maze = new int[anchodellaberinto, largodellaberinto];
         private static Random random = new Random();
         private Personajes user1;
@@ -169,7 +168,7 @@ namespace Creaciondeljuego
         private new List<Personajes> PersonajesAelegir;
         private Habilidades Habilidades;
 
-        private int Sistemadeturnos = 0; //turnos
+        private int Sistemadeturnos = 0; //turnos 
 
 
         public Laberinto(int ancho, int largo)
@@ -178,13 +177,13 @@ namespace Creaciondeljuego
             largodellaberinto = largo;
             Maze = new int[anchodellaberinto, largodellaberinto];
 
-            // Inicializar el laberinto con paredes (1)
+            // Inicializar el laberinto con paredes 
             for (int i = 0; i < anchodellaberinto; i++)
                 for (int j = 0; j < largodellaberinto; j++)
                     Maze[i, j] = 1;
 
-            Iniciodellaberinto();
-            ColocarTrampas();
+            Iniciodellaberinto();  //Se inicializa el laberinto
+            ColocarTrampas(); //Se colocan las trampas
 
         }
 
@@ -198,6 +197,7 @@ namespace Creaciondeljuego
             Expansiondecaminos(casillainicial, casillafinal);
             Maze[1, 1] = 0; // Punto de inicio
             Maze[anchodellaberinto - 2, largodellaberinto - 1] = 0; // Punto final
+         
         }
 
 
@@ -237,30 +237,30 @@ namespace Creaciondeljuego
         }
         private static void Mezcla(ref int a, ref int b) //Mezclar direcciones
         {
-            int temp = a;
+            int temp = a; //Se llama en Expansion de caminos
             a = b;
             b = temp;
         }
         public void CreacionDeLista()
         {
 
-            Habilidades sanador = new Habilidades("Sanador", 30, 2);
-            Habilidades superVeloz = new Habilidades("Super Veloz", 3, 2);
-            Habilidades superPro = new Habilidades("Super pro", 0, 2);
-            Habilidades atraviesaParedes = new Habilidades("Atravisa paredes", 0, 1);
-            Habilidades ignoraTrampas = new Habilidades("Ignora Trampas", 0, 2);
-            Habilidades master = new Habilidades("Master", 5, 2);
+            Habilidades sanador = new Habilidades("Sanador", 30, 30000); //Establecer habilidades
+            Habilidades superVeloz = new Habilidades("Super Veloz", 2, 50000);
+            Habilidades superPro = new Habilidades("Super pro", 0, 20000);
+          
+            Habilidades ignoraTrampas = new Habilidades("Ignora Trampas", 0, 90000);
+            Habilidades master = new Habilidades("Master", 5, 10000);
 
 
             PersonajesAelegir = new List<Personajes>
-            { new Personajes("Patricio", 'L', 1, 1, 45, 2, superPro), new Personajes("Gary", 'G', 1, 1, 50, 2,ignoraTrampas ), new Personajes("Bob Esponja", 'B', 1, 1, 60, 1, master),
-             new Personajes("Calamardo", 'C', 1, 1, 70, 1, sanador), new Personajes("Arenita", 'A', 1, 1, 90, 2,atraviesaParedes), new Personajes("Don Cangrejo", 'D', 1, 1, 100,1, superVeloz )};
+            { new Personajes("Patricio", 'L', 1, 1, 45, 2, superPro), new Personajes("Arenita", 'A', 1, 1, 50, 2,ignoraTrampas ), new Personajes("Bob Esponja", 'B', 1, 1, 60, 1, master),
+             new Personajes("Calamardo", 'C', 1, 1, 70, 1, sanador),  new Personajes("Don Cangrejo", 'D', 1, 1, 100,1, superVeloz )};
           
 
             for (int i = 0; i < PersonajesAelegir.Count; i++)
             {
                 var character = PersonajesAelegir[i]; //Para que salga el menu
-                var table = new Table()
+                var table = new Table() //Hace tabla el menu
              .Border(TableBorder.Rounded) // Añae un borde redondeado
              .AddColumn(new TableColumn("[bold]Nombre[/]").Centered()) //Centrar, poner en letra negrita
              .AddColumn(new TableColumn("[bold]Vida[/]").Centered())
@@ -320,7 +320,7 @@ namespace Creaciondeljuego
             Console.WriteLine("El personajes 2 ha escogido a   {0} ", user2.Nombre); //Para mostrar selecciones
             AnsiConsole.Progress()  //Barra de progreso
         .Start(ctx =>
-        { var task = ctx.AddTask("Cargando laberito");
+        { var task = ctx.AddTask("Cargando laberinto...");
             while (!task.IsFinished)
             {
                 task.Increment(1);
@@ -332,7 +332,7 @@ namespace Creaciondeljuego
 
 
 
-        private int CaracterCorrecto(int personajess)
+        private int CaracterCorrecto(int personajess) //Para al introducir carcteres erroneos, pedir que se vuelva a introducir
         {
             int seleccion1 = 0;
             bool caractervalido = false;
@@ -346,11 +346,11 @@ namespace Creaciondeljuego
 
                     if (seleccion1 >= 1 && seleccion1 <= personajess)
                     {
-                        caractervalido = true; // Vakido
+                        caractervalido = true; // Valido
                     }
                     else
                     {
-                        Console.WriteLine("Introduce un numero entre 1  posicionydelatrampa {0}", personajess);
+                        Console.WriteLine("Introduce un numero entre 1  y el 5", personajess);
                     }
                 }
                 catch (FormatException) // Captura excepciones si la entrada no es un número
@@ -373,7 +373,7 @@ namespace Creaciondeljuego
             // Trampa que quita vida 
             ColocarTrampaAleatoria(5);
 
-            // Trampa que quita vida posicionydelatrampa reduce velocidad 
+            // Trampa que quita vida y reduce velocidad 
             ColocarTrampaAleatoria(7);
 
             // Trampa que reduce velocidad 
@@ -392,123 +392,122 @@ namespace Creaciondeljuego
 
             Maze[posicionxdelatrampa, posicionydelatrampa] = tipodeTrampa; // Colocar la trampa
         }
-        private void AplicarEfectoTrampa(Personajes personajes) //Que le caigs el efecto
+
+
+        private void AplicaciondeEfecto(Personajes personajes)
         {
-
-            if (personajes.InmuneATrampas)
+            if (personajes.InmuneATrampas) // Verificar inmunidad a trampas
             {
-
-                Console.WriteLine("Eres inmune a trampas");
-                return;
+                Console.WriteLine("Eres inmune a trampas.");
+                Thread.Sleep(1000);
+                return; // Salir del método si el personaje es inmune
             }
+
             int celdaActual = Maze[personajes.PosicionX, personajes.PosicionY];
 
             switch (celdaActual)
             {
                 case 5: // Trampa que quita vida
                     personajes.Vida -= 10;
-                    Console.WriteLine("El personajes {0} ha caido en una trampa.Pierde 10 de vida ", personajes.Nombre);
+                    Console.WriteLine("El personaje {0} ha caído en una trampa. Pierde 10 de vida.", personajes.Nombre);
                     MostrarEstadoJugador(personajes);
-                    //MoverTrampaAleatoria(personajes.PosicionX, personajes.PosicionY, 5);
+                    Thread.Sleep(1000);
                     break;
 
-                case 7: // Trampa que quita vida nuevaposiciondelatrampaY reduce velocidad
+                case 7: // Trampa que quita vida y reduce velocidad
                     int velocidadOriginal = personajes.Velocidad;
                     personajes.Velocidad = 1;
                     personajes.Vida -= 30;
-                    Console.WriteLine("El personajes {0} ha caido en una trampa.Pierde 10 de vida . Velocidad reducida a 1 temporalmente", personajes.Nombre);
+                    Console.WriteLine("El personaje {0} ha caído en una trampa. Pierde 30 de vida. Velocidad reducida a 1 temporalmente.", personajes.Nombre);
                     MostrarEstadoJugador(personajes);
-                    RestaurarVelocidad(personajes, velocidadOriginal);
-                    //MoverTrampaAleatoria(personajes.PosicionX, personajes.PosicionY, 7);
                     RestaurarVelocidad(personajes, velocidadOriginal);
                     break;
 
                 case 9: // Trampa que reduce velocidad
-                    velocidadOriginal = personajes.Velocidad;
-                    personajes.Velocidad = 3;
-                    Console.WriteLine("El personajes {0} ha caido en una trampa. Velocidad reducida a 2 temporalmente", personajes.Nombre);
+                    int velocidadOriginal2 = personajes.Velocidad;
+                    personajes.Velocidad = 2;
+                    Console.WriteLine("El personaje {0} ha caído en una trampa. Velocidad reducida a 2 temporalmente.", personajes.Nombre);
                     MostrarEstadoJugador(personajes);
-                    RestaurarVelocidad(personajes, velocidadOriginal);
-                    //MoverTrampaAleatoria(personajes.PosicionX, personajes.PosicionY, 9);
-
+                    RestaurarVelocidad(personajes, velocidadOriginal2);
                     break;
-
             }
-            MostrarEstadoJugador(personajes);
+            MostrarEstadoJugador(personajes); // Muestra un menú con el estado de los jugadores
         }
 
-        //private void MoverTrampaAleatoria(int nuevaposiciondelatrampaX, int nuevaposiciondelatrampaY, int tipoTrampa)
-        //{
-        //    Maze[nuevaposiciondelatrampaX, nuevaposiciondelatrampaY] = 0; // Eliminar la trampa de la posición actual
-        //    //ColocarTrampaAleatoria(tipoTrampa); // Colocar la trampa en una nueva posición aleatoria
-        //}
+        
 
-        private async void RestaurarVelocidad(Personajes jugador, int velocidadOriginal)
+        private  void RestaurarVelocidad(Personajes jugador, int velocidadOriginal) //Restauracion de velocidad
         {
-            await Task.Delay(10000); //Simular tiempo
+             Task.Delay(30000); //Simular tiempo
             jugador.Velocidad = velocidadOriginal;
             Console.WriteLine("El personajes {0} ha recuperado su velocidad{1}", jugador.Nombre, velocidadOriginal);
         }
-
-        private void MostrarEstadoJugador(Personajes personajes)
+      
+        private void MostrarEstadoJugador(Personajes personajes) //Mostrar estado
         {
 
             Console.WriteLine("Nombre : {0} Vida : {1}  Velocidad {2}", personajes.Nombre, personajes.Vida, personajes.Velocidad);
-            Thread.Sleep(1000);
+            
+            Thread.Sleep(1000); //Tiempo en el que se mostrara
         }
+      
+
+
 
 
         public void MoverUser1(char direccion)
         {
-            int deltaX = 0, deltaY = 0;
+            int Movuser1X = 0, Movuser2Y = 0;
 
             // Determinar la dirección basada en la tecla presionada
             switch (direccion)
             {
-                case 'W': deltaX = -1; break; // Arriba
-                case 'S': deltaX = 1; break;  // Abajo
-                case 'A': deltaY = -1; break; // Izquierda
-                case 'D': deltaY = 1; break;  // Derecha
+                case 'W': Movuser1X = -1; break; // Arriba
+                case 'S': Movuser1X = 1; break;  // Abajo
+                case 'A': Movuser2Y = -1; break; // Izquierda
+                case 'D': Movuser2Y = 1; break;  // Derecha
             }
 
-            MoverJugadorConVelocidad(user1, deltaX, deltaY);
+            MoverJugadorConVelocidad(user1, Movuser1X, Movuser2Y);
         }
 
-        public void MoverUser2(ConsoleKey direccion)
+        public void MoverUser2(ConsoleKey direccion) //Movimiento del 2do personajes
         {
-            int deltaX = 0, deltaY = 0;
+            int Movuser2X = 0, Movuser2Y = 0;
 
             // Determinar la dirección basada en la tecla presionada
             switch (direccion)
             {
-                case ConsoleKey.UpArrow: deltaX = -1; break;    // Arriba
-                case ConsoleKey.DownArrow: deltaX = 1; break;   // Abajo
-                case ConsoleKey.LeftArrow: deltaY = -1; break;  // Izquierda
-                case ConsoleKey.RightArrow: deltaY = 1; break;  // Derecha
+                case ConsoleKey.UpArrow: Movuser2X = -1; break;    // Arriba
+                case ConsoleKey.DownArrow: Movuser2X = 1; break;   // Abajo
+                case ConsoleKey.LeftArrow: Movuser2Y = -1; break;  // Izquierda
+                case ConsoleKey.RightArrow: Movuser2Y = 1; break;  // Derecha
             }
 
-            MoverJugadorConVelocidad(user2, deltaX, deltaY);
+            MoverJugadorConVelocidad(user2, Movuser2X, Movuser2Y);
         }
 
-        private bool EsMovimientoValido(int x, int y)
+        private bool EsMovimientoValido(Personajes personajes, int x, int y)
         {
-            // Permitir movimiento a casillas vacías (0) o con trampas (5, 7, 9)
+            // Permitir movimiento a casillas validas o con trampas 
+          
+
             return x >= 0 && x < anchodellaberinto && y >= 0 && y < largodellaberinto &&
                    (Maze[x, y] == 0 || Maze[x, y] == 5 || Maze[x, y] == 7 || Maze[x, y] == 9);
         }
         private void ManejarVida(Personajes personajes)
         {
-            // Asegurar que la vida no exceda 100
+            // Asegurarse que la vida no exceda 100
             if (personajes.Vida > 100)
             {
                 personajes.Vida = 100;
                 Console.WriteLine($"{personajes.Nombre} ha alcanzado el máximo de vida (100).");
             }
 
-            // Verificar si la vida llegó a 0
+            // Verifica si la vida llegó a 0
             if (personajes.Vida <= 0)
             {
-                Console.WriteLine($"{personajes.Nombre} ha perdido toda su vida. Regresando al inicio...");
+                Console.WriteLine($"{personajes.Nombre} ha perdido toda su vida. Comenzara de nuevo");
                 RegresarAlInicio(personajes);
             }
         }
@@ -516,7 +515,7 @@ namespace Creaciondeljuego
         private void RegresarAlInicio(Personajes personajes)
         {
             //Restaurar vida
-            personajes.Vida = 10;
+            personajes.Vida = 20;
 
             // Mover  al punto de inicio
             personajes.PosicionX = 1;
@@ -525,23 +524,23 @@ namespace Creaciondeljuego
             Console.WriteLine("El personaje {0} ha regresado al principio", personajes.Nombre);
         }
 
-        private void MoverJugadorConVelocidad(Personajes jugador, int deltaX, int deltaY)
+        private void MoverJugadorConVelocidad(Personajes personajes, int nuevoMovimientoX, int NuevoMovimientoY)
         {
-            int velocidadRestante = jugador.Velocidad;
+            int velocidadRestante = personajes.Velocidad;
 
             while (velocidadRestante > 0)
             {
-                int nuevaX = jugador.PosicionX + deltaX;
-                int nuevaY = jugador.PosicionY + deltaY;
+                int nuevaX = personajes.PosicionX + nuevoMovimientoX;
+                int nuevaY = personajes.PosicionY + NuevoMovimientoY;
 
-                if (EsMovimientoValido(nuevaX, nuevaY))
+                if (EsMovimientoValido(personajes, nuevaX, nuevaY)) //Si lo es, se movera
                 {
-                    jugador.PosicionX = nuevaX;
-                    jugador.PosicionY = nuevaY;
+                    personajes.PosicionX = nuevaX;
+                    personajes.PosicionY = nuevaY;
                     velocidadRestante--;
 
                     // Verificar si el personajes cayo en una trampa
-                    AplicarEfectoTrampa(jugador);
+                    AplicaciondeEfecto(personajes);
                 }
                 else
                 {
@@ -559,87 +558,111 @@ namespace Creaciondeljuego
         {
             return tecla == ConsoleKey.UpArrow || tecla == ConsoleKey.DownArrow || tecla == ConsoleKey.LeftArrow || tecla == ConsoleKey.RightArrow;
         }
-        private void BajarTiempodeEnfriamiento(Personajes jugador) //Metodo para reducir el tiempo de enfriamiento
-        {
-            if (jugador.Habilidades != null && jugador.Habilidades.TiempodeEnfriamientoRestante > 0)
-            {
-                jugador.Habilidades.TiempodeEnfriamientoRestante--;
-            }
-        }
+
         public void Avancedeljuego()
         {
             while (true)
             {
                 Console.Clear();
                 PintarLaberinto();
-                Personajes jugadorActual = Sistemadeturnos == 0 ? user1 : user2;
-                Console.WriteLine($"Turno de: {(Sistemadeturnos == 0 ? "Jugador 1" : "Jugador 2")}"); //Sistema de turnos
-                BajarTiempodeEnfriamiento(user1);
-                BajarTiempodeEnfriamiento(user2 );
+                Personajes jugadorActual = user1;
+
+                Console.WriteLine("Turno de Jugador 1");
+                ManejarVida(user1);
+
                 Console.WriteLine("¿Deseas activar tu habilidad?");
                 Console.WriteLine("Presiona X para confirmar o cualquier tecla para rechazar");
                 char respuesta = Console.ReadKey().KeyChar;
                 respuesta = char.ToUpper(respuesta);
 
-                if (respuesta == 'X' && jugadorActual.Habilidades != null) //Elegir si usar habilidad o no
+                if (respuesta == 'X' && jugadorActual.Habilidades != null)
                 {
-                    jugadorActual.Habilidades.Activacion(jugadorActual);
+                    if (!jugadorActual.Habilidades.EnCooldown)
+                    {
+                        jugadorActual.Habilidades.Activacion(jugadorActual);
+                    }
+                    else
+                    {
+                        Console.WriteLine("La habilidad {0} esta en cooldown  ", jugadorActual.Habilidades.Nombre);
+                        Thread.Sleep(1000);
+                    }
                 }
+
                 bool movimientoValido = false;
 
-                if (Sistemadeturnos == 0)
+                while (!movimientoValido)
                 {
                     Console.WriteLine("Jugador 1: Usa W (arriba), A (izquierda), S (abajo), D (derecha) para moverte.");
                     char tecla = Console.ReadKey().KeyChar;
-                    tecla = char.ToUpper(tecla); // Convertir a mayúscula para evitar problemas con minúsculas
+                    tecla = char.ToUpper(tecla);
 
                     if (MovimientoValido(tecla))
                     {
-                        MoverUser1(tecla); // Mover
+                        MoverUser1(tecla);
                         movimientoValido = true;
                     }
                     else
                     {
-                        Console.WriteLine("Tecla invalida, presiona otra"); //Para avisar que se debe presionar
-                        Console.ReadKey();
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("Jugador 2: Usa las flechas (↑, ↓, ←, →) para moverte.");
-                    ConsoleKey tecla = Console.ReadKey().Key;
-
-                    if (MovimientoValido2(tecla))
-                    {
-                        MoverUser2(tecla); // Mover 
-                        movimientoValido = true;
-                    }
-                    else
-                    {
-                        Console.WriteLine("Tecla invalida"); //Para indicar que se debe presionar otra
-                        Console.ReadKey(); // Esperar a que  presione una tecla
+                        Console.WriteLine("Tecla invalida, presiona otra");
                     }
                 }
 
-                // Evitar que pase el turno si el movimiento no fue valido
-                if (movimientoValido)
-                {
-                    Sistemadeturnos = (Sistemadeturnos + 1) % 2; // Alternar turnos
-                }
-                //Poner por aqui condicion de victoria
-                if (user1.PosicionX == anchodellaberinto - 1 && user1.PosicionY == largodellaberinto - 2)
+                if (user1.PosicionX == anchodellaberinto - 2 && user1.PosicionY == largodellaberinto - 1)
                 {
                     Console.Clear();
                     Console.WriteLine("Ha ganado {0}", user1.Nombre);
                     return;
                 }
-                else if (user2.PosicionX == anchodellaberinto - 1 && user2.PosicionY == largodellaberinto - 2)
+
+                Console.Clear();
+                PintarLaberinto();
+                jugadorActual = user2;
+
+                Console.WriteLine("Turno de Jugador 2");
+                ManejarVida(user2);
+
+                Console.WriteLine("¿Deseas activar tu habilidad?");
+                Console.WriteLine("Presiona X para confirmar o cualquier tecla para rechazar");
+                respuesta = Console.ReadKey().KeyChar;
+                respuesta = char.ToUpper(respuesta);
+
+                if (respuesta == 'X' && jugadorActual.Habilidades != null)
+                {
+                    if (!jugadorActual.Habilidades.EnCooldown)
+                    {
+                        jugadorActual.Habilidades.Activacion(jugadorActual);
+                    }
+                    else
+                    {
+                        Console.WriteLine("La habilidad {0} esta en cooldown  ", jugadorActual.Habilidades.Nombre);
+                        Thread.Sleep(1000);
+                    }
+                }
+
+                movimientoValido = false;
+
+                while (!movimientoValido)
+                {
+                    Console.WriteLine("Jugador 2: Usa las flechas (↑, ↓, ←, →) para moverte.");
+                    ConsoleKey tecla2 = Console.ReadKey().Key;
+
+                    if (MovimientoValido2(tecla2))
+                    {
+                        MoverUser2(tecla2);
+                        movimientoValido = true;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Tecla invalida");
+                    }
+                }
+
+                if (user2.PosicionX == anchodellaberinto - 2 && user2.PosicionY == largodellaberinto - 1)
                 {
                     Console.Clear();
                     Console.WriteLine("Ha ganado {0}", user2.Nombre);
                     return;
                 }
-
             }
         }
         private void PintarLaberinto()
@@ -694,6 +717,18 @@ namespace Creaciondeljuego
                         Console.ForegroundColor = ConsoleColor.Gray;
                         Console.Write("S" + " "); // Trampa que reduce velocidad
                     }
+                    else if(Maze[i, j] == 4)
+                    {
+                        Console.BackgroundColor = ConsoleColor.DarkBlue;
+                        Console.ForegroundColor = ConsoleColor.DarkBlue;
+                        Console.Write("F" + " "); 
+                    }
+                    else if (Maze[i, j] == 6)
+                    {
+                        Console.BackgroundColor = ConsoleColor.DarkGreen;
+                        Console.ForegroundColor = ConsoleColor.DarkGreen;
+                        Console.Write("L" + " ");
+                    }
                     else
                     {
                         
@@ -714,25 +749,38 @@ public class Habilidades
     public string Nombre { get; set; }
     public int Efectodelatrampa { get; set; }
     public int TiempodeEnfriamiento { get; set; }
-    public int TiempodeEnfriamientoRestante { get; set; }
+    public bool EnCooldown { get; set; }
 
     public Habilidades(string nombre, int efectodelatrampa, int tiempodeEnfriamiento)
     {
         Nombre = nombre;
         Efectodelatrampa = efectodelatrampa;
         TiempodeEnfriamiento = tiempodeEnfriamiento;
-        TiempodeEnfriamientoRestante = 0; //Comienza asi
-
+        EnCooldown = false;
     }
+
+    private void ActivarInmunidadTrampas(Personajes personajes, int duracionInmunidad)
+    {
+        personajes.InmuneATrampas = true; // Activar inmunidad
+        Console.WriteLine("El personaje {0} es inmune a trampas durante {1} segundos.", personajes.Nombre, duracionInmunidad / 1000);
+
+        Task.Delay(duracionInmunidad).ContinueWith(t =>
+        {
+            personajes.InmuneATrampas = false; // Desactivar inmunidad después del tiempo especificado
+            Console.WriteLine("La inmunidad a trampas de {0} ha terminado.", personajes.Nombre);
+        });
+    }
+
     public void Activacion(Personajes personajes)
     {
-
-        if (TiempodeEnfriamientoRestante > 0)
+        if (EnCooldown)
         {
-            Console.WriteLine("El personaje {0} no tiene disponible aun la habilidad {1} ", personajes.Nombre, personajes.Habilidades.Nombre);
+            Console.WriteLine("La habilidad {0} está en cooldown.", Nombre);
             return;
         }
-        Console.WriteLine("El personaje {0} usara la habilidad {1} ", personajes.Nombre, personajes.Habilidades.Nombre);
+
+        Console.WriteLine("El personaje {0} usará la habilidad {1}", personajes.Nombre, Nombre);
+
         switch (Nombre)
         {
             case "Sanador":
@@ -740,62 +788,57 @@ public class Habilidades
                 break;
 
             case "Super Veloz":
-                personajes.Velocidad += 3;
-                Task.Delay(10000);
+                personajes.Velocidad += 2;
                 break;
 
             case "Super pro":
-                personajes.Vida += 1;
-                personajes.AtraviesaParedes = true;
-                Task.Delay(10000);
-                break;
-
-            case "Atravisa paredes":
-                personajes.AtraviesaParedes = true;
-                Task.Delay(10000);
+                personajes.Vida += 10;
+                ActivarInmunidadTrampas(personajes, 30000); 
                 break;
 
             case "Ignora Trampas":
-                personajes.InmuneATrampas = true;
-                Task.Delay(10000).ContinueWith(_ => DesactivaciondeTrampas(personajes)); //Desactivar tiempo
+                ActivarInmunidadTrampas(personajes, 30000); 
                 break;
+
             case "Master":
-                personajes.AtraviesaParedes = true;
-                Task.Delay(10000);
                 personajes.Vida += 5;
+                personajes.Velocidad += 1;
                 break;
         }
-        TiempodeEnfriamientoRestante = TiempodeEnfriamiento;
+
+        EnCooldown = true; // Activa el cooldown
+        IniciarCooldown(); 
     }
-    private void DesactivaciondeTrampas(Personajes personajes)
+
+    private void IniciarCooldown()
     {
-        personajes.InmuneATrampas = false;
-        Console.WriteLine("El jugador {0} ya no es inmune a trampas", personajes.Nombre);
-    }
-    private void DesactivarParedes(Personajes personajes)
-    {
-        personajes.AtraviesaParedes = false;
-        Console.WriteLine("El jugador {0} ya no puede atravesar paredes", personajes.Nombre);
-    }
-    private void Tiempo()
-    {
-        if (TiempodeEnfriamientoRestante > 0)
+        Thread cooldownThread = new Thread(() =>
         {
-            TiempodeEnfriamientoRestante--;
-        }
+            Thread.Sleep(TiempodeEnfriamiento); // Espera el tiempo de cooldown
+            EnCooldown = false; // Quita el cooldown
+            Console.WriteLine($"El cooldown de {Nombre} ha terminado.");
+        });
+        cooldownThread.Start();
     }
 
-}
 
 
 
-public class Ciclodeljuego
+
+
+
+
+
+
+
+    public class Ciclodeljuego
 {
 
     public static void Main(string[] args)
     {
         Game game = new Game();
         game.Iniciar();
+    }
     }
 }
 
